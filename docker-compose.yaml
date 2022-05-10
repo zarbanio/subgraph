@@ -14,7 +14,7 @@ services:
     environment:
       postgres_host: postgres
       postgres_user: graph-node
-      postgres_pass: let-me-in
+      postgres_pass: B3M99QWKqZcghrBmajBs
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
       # Change next line if you want to connect to a different JSON-RPC endpoint
@@ -33,7 +33,7 @@ services:
     command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
     environment:
       POSTGRES_USER: graph-node
-      POSTGRES_PASSWORD: let-me-in
+      POSTGRES_PASSWORD: B3M99QWKqZcghrBmajBs
       POSTGRES_DB: graph-node
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
