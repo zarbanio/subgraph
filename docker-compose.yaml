@@ -19,7 +19,7 @@ services:
       ipfs: 'ipfs:5001'
       # Change next line if you want to connect to a different JSON-RPC endpoint
       ethereum: 'fuji:https://api.avax-test.network/ext/bc/C/rpc'
-      GRAPH_LOG:
+      GRAPH_LOG: error
   ipfs:
     image: ipfs/go-ipfs:v0.4.23
     ports:
