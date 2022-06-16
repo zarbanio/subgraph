@@ -72,25 +72,5 @@ export function handleFallbackOracleUpdated(event: FallbackOracleUpdated): void 
         }
       }
     }
-
-    // update USDETH price
-    let fallbackOracle = FallbackPriceOracle.bind(event.params.fallbackOracle);
-    let ethUsdPrice = zeroBI();
-    // try method for dev networks
-    let ethUsdPriceCall = fallbackOracle.try_getEthUsdPrice();
-    if (ethUsdPriceCall.reverted) {
-      // try method for ropsten and mainnet
-      ethUsdPrice = formatUsdEthChainlinkPrice(
-        fallbackOracle.getAssetPrice(Address.fromString(MOCK_USD_ADDRESS))
-      );
-    } else {
-      ethUsdPrice = ethUsdPriceCall.value;
-    }
-    if (
-      priceOracle.usdPriceEthFallbackRequired ||
-      priceOracle.usdPriceEthMainSource.equals(zeroAddress())
-    ) {
-      usdEthPriceUpdate(priceOracle, ethUsdPrice, event);
-    }
   }
 }
