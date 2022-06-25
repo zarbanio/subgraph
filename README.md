@@ -215,3 +215,12 @@ Synced:
 ```
 curl --location --request POST 'https://api.thegraph.com/index-node/graphql' --data-raw '{"query":"{ indexingStatusForCurrentVersion(subgraphName: \"aave/protocol-v2\") { subgraph fatalError { message } nonFatalErrors {message } } }"}'
 ```
+
+```
+docker-compose up -d
+npm i
+npm run generate:schema
+npm run prepare:subgraph
+npx graph create --node http://127.0.0.1:8020 valoura
+npx graph deploy valoura --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020
+```
