@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+
+# generated files
+generated
+schema.graphql
+subgraph.yaml
+
+# builded files
+build
+
+# data
+data
+
+# Optional npm cache directory
+.npm
+yarn.lock
+
+# Optional eslint cache
+.eslintcache
+
+# IDEA
+.idea
