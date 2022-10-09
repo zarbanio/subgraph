@@ -1,10 +1,10 @@
 import { PriceOracle, PriceOracleAsset } from '../../../generated/schema';
 import {
-    ValouraOracle,
+    AustralisOracle,
     AssetSourceUpdated,
     BaseCurrencySet,
     FallbackOracleUpdated
-} from '../../../generated/ValouraOracle/ValouraOracle';
+} from '../../../generated/AustralisOracle/AustralisOracle';
 import { Address, ethereum, log } from '@graphprotocol/graph-ts';
 import {
     formatUsdEthChainlinkPrice,
@@ -13,8 +13,8 @@ import {
     zeroAddress,
     zeroBI,
 } from '../../utils/converters';
-import { IExtendedPriceAggregator } from '../../../generated/ValouraOracle/IExtendedPriceAggregator';
-import { EACAggregatorProxy } from '../../../generated/ValouraOracle/EACAggregatorProxy';
+import { IExtendedPriceAggregator } from '../../../generated/AustralisOracle/IExtendedPriceAggregator';
+import { EACAggregatorProxy } from '../../../generated/AustralisOracle/EACAggregatorProxy';
 import {
     ChainlinkAggregator as ChainlinkAggregatorContract,
     FallbackPriceOracle as FallbackPriceOracleContract
@@ -26,7 +26,6 @@ import {
 } from '../../helpers/initializers';
 import {MOCK_USD_ADDRESS, ZERO_ADDRESS} from '../../utils/constants';
 import { genericPriceUpdate, usdEthPriceUpdate } from '../../helpers/price-updates';
-import { AggregatorUpdated } from '../../../generated/ChainlinkSourcesRegistry/ChainlinkSourcesRegistry';
 
 export function priceFeedUpdated(
     event: ethereum.Event,
@@ -38,7 +37,7 @@ export function priceFeedUpdated(
     let sAssetAddress = assetAddress.toHexString();
 
     // We get the current price from the oracle. Valid for chainlink source and custom oracle
-    let proxyPriceProvider = ValouraOracle.bind(
+    let proxyPriceProvider = AustralisOracle.bind(
         Address.fromString(priceOracle.proxyPriceProvider.toHexString())
     );
     let priceFromOracle = zeroBI();
@@ -177,7 +176,7 @@ export function handleFallbackOracleUpdated(event: FallbackOracleUpdated): void 
 
         // update prices on assets which use fallback
 
-        let proxyPriceProvider = ValouraOracle.bind(event.address);
+        let proxyPriceProvider = AustralisOracle.bind(event.address);
         for (let i = 0; i < priceOracle.tokensWithFallback.length; i++) {
             let token = priceOracle.tokensWithFallback[i];
             let priceOracleAsset = getPriceOracleAsset(token);
@@ -215,16 +214,6 @@ export function handleAssetSourceUpdated(event: AssetSourceUpdated): void {
 
     let priceOracleAsset = getPriceOracleAsset(assetAddress.toHexString());
     priceOracleAsset.fromChainlinkSourcesRegistry = false;
-    priceFeedUpdated(event, assetAddress, assetOracleAddress, priceOracleAsset, priceOracle);
-}
-
-export function handleChainlinkAggregatorUpdated(event: AggregatorUpdated): void {
-    let assetAddress = event.params.token;
-    let assetOracleAddress = event.params.aggregator; // its proxy . Wrong naming
-
-    let priceOracle = getOrInitPriceOracle();
-    let priceOracleAsset = getPriceOracleAsset(assetAddress.toHexString());
-    priceOracleAsset.fromChainlinkSourcesRegistry = true;
     priceFeedUpdated(event, assetAddress, assetOracleAddress, priceOracleAsset, priceOracle);
 }
 

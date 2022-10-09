@@ -1,0 +1,7 @@
+{
+  "network": "aurora",
+  "AustralisOracleAddress": "0xa650daC1BD718e8479253b39b1ea1FACA5c6ac41",
+  "AustralisOracleStartBlock": 74385916,
+  "LendingPoolAddressesProviderRegistryAddress": "0xC40c5F1EFEeE81CeF9A473F49e2304AA2BE57c2a",
+  "LendingPoolAddressesProviderRegistryStartBlock": 74382663
+}

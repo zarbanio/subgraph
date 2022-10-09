@@ -2,7 +2,7 @@ version: '3'
 services:
   graph-node:
     restart: on-failure
-    image: graphprotocol/graph-node:v0.26.0
+    image: graphprotocol/graph-node:v0.27.0
     ports:
       - '8000:8000'
       - '8001:8001'
@@ -19,8 +19,11 @@ services:
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
       # Change next line if you want to connect to a different JSON-RPC endpoint
+      # Mainnet
       ethereum: 'aurora:https://mainnet.aurora.dev'
-      GRAPH_LOG: error
+      #Testnet
+      #ethereum: 'aurora-testnet:https://testnet.aurora.dev'
+      GRAPH_LOG: debug
   ipfs:
     image: ipfs/go-ipfs:v0.4.23
     ports:

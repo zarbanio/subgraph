@@ -7,7 +7,7 @@ import {
   UsdEthPriceHistoryItem,
 } from '../../generated/schema';
 import { getOrInitPriceOracle, getPriceOracleAsset } from './initializers';
-import { ValouraOracle } from '../../generated/templates/ChainlinkAggregator/ValouraOracle';
+import { AustralisOracle } from '../../generated/templates/ChainlinkAggregator/AustralisOracle';
 
 export function savePriceToHistory(oracleAsset: PriceOracleAsset, event: ethereum.Event): void {
   let id = oracleAsset.id + event.block.number.toString() + event.transaction.index.toString();
@@ -19,11 +19,11 @@ export function savePriceToHistory(oracleAsset: PriceOracleAsset, event: ethereu
 }
 
 // Method called for external pool updates Uniswap / balancer etc
-export function updateAssetPriceFromValouraOracle(event: ethereum.Event): void {
+export function updateAssetPriceFromAustralisOracle(event: ethereum.Event): void {
   let assetAddress = event.address;
   let priceOracle = getOrInitPriceOracle();
   let priceOracleAsset = getPriceOracleAsset(assetAddress.toHexString());
-  let proxyPriceProvider = ValouraOracle.bind(
+  let proxyPriceProvider = AustralisOracle.bind(
     Address.fromString(priceOracle.proxyPriceProvider.toHexString())
   );
 
@@ -43,7 +43,7 @@ export function updateAssetPriceFromValouraOracle(event: ethereum.Event): void {
 
 export function updateDependentAssets(dependentAssets: string[], event: ethereum.Event): void {
   let proxyPriceProviderAddress = getOrInitPriceOracle().proxyPriceProvider;
-  let proxyPriceProvider = ValouraOracle.bind(
+  let proxyPriceProvider = AustralisOracle.bind(
     Address.fromString(proxyPriceProviderAddress.toHexString())
   );
 

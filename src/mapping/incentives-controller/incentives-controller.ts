@@ -6,7 +6,7 @@ import {
   RewardsAccrued,
   RewardsClaimed,
   UserIndexUpdated,
-} from '../../../generated/templates/AaveIncentivesController/AaveIncentivesController';
+} from '../../../generated/templates/AustralisIncentivesController/AustralisIncentivesController';
 import {
   ClaimIncentiveCall,
   IncentivesController,

@@ -1,7 +1,7 @@
 
-# Aave Protocol Subgraphs
+# Australis Protocol Subgraphs
 
-The Aave Protocol subgraphs index data from the protocol smart contracts, and expose a GraphQL endpoint hosted by [The Graph](https://thegraph.com).
+The Australis Protocol subgraphs index data from the protocol smart contracts, and expose a GraphQL endpoint hosted by [The Graph](https://thegraph.com).
 
 - [Active Deployments](#active-deployments)
 - [Usage](#usage)
@@ -9,19 +9,13 @@ The Aave Protocol subgraphs index data from the protocol smart contracts, and ex
 
  
 ## Active deployments
--  [ETH Mainnet V2](https://thegraph.com/hosted-service/subgraph/aave/protocol-v2)
--  [Polygon V2](https://thegraph.com/hosted-service/subgraph/aave/aave-v2-matic)
--  [Avalanche V2](https://thegraph.com/hosted-service/subgraph/aave/protocol-v2-avalanche)
--  [Polygon V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-polygon)
--  [Avalanche V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-avalanche)
--  [Arbitrum V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-arbitrum)
--  [Optimism V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-optimism)
--  [Fantom V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-fantom)
+-  [Aurora Mainnet](https://thegraph.com/hosted-service/subgraph/aave/protocol-v2)  // TODO
+-  [Aurora Testnet](https://thegraph.com/hosted-service/subgraph/aave/protocol-v2-testnet)  // TODO
 - TheGraph is not available yet on Harmony
 
 ## Usage
   
-Subgraphs can be queried directly from the graph explorer, or from [another application](https://thegraph.com/docs/en/developer/querying-from-your-app/). The following section gives common queries for Aave protocol data.
+Subgraphs can be queried directly from the graph explorer, or from [another application](https://thegraph.com/docs/en/developer/querying-from-your-app/). The following section gives common queries for Australis protocol data.
 
 ### Queries
 
@@ -217,10 +211,12 @@ curl --location --request POST 'https://api.thegraph.com/index-node/graphql' --d
 ```
 
 ```
-docker-compose up -d
 npm i
 npm run generate:schema
-npm run prepare:subgraph
-npx graph create --node http://127.0.0.1:8020 valoura
-npx graph deploy valoura --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020
+npm run prepare:subgraph:aurora
+(Testnet: npm run prepare:subgraph:aurora-testnet)
+
+docker-compose up -d
+npx graph create --node http://127.0.0.1:8020 australis
+npx graph deploy australis --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020
 ```

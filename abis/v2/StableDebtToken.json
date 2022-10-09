@@ -452,7 +452,7 @@
       "name": "getIncentivesController",
       "outputs": [
         {
-          "internalType": "contract IAaveIncentivesController",
+          "internalType": "contract IAustralisIncentivesController",
           "name": "",
           "type": "address"
         }
@@ -594,7 +594,7 @@
           "type": "address"
         },
         {
-          "internalType": "contract IAaveIncentivesController",
+          "internalType": "contract IAustralisIncentivesController",
           "name": "incentivesController",
           "type": "address"
         },
