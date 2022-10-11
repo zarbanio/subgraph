@@ -9,8 +9,8 @@ The Australis Protocol subgraphs index data from the protocol smart contracts, a
 
  
 ## Active deployments
--  [Aurora Mainnet](https://thegraph.com/hosted-service/subgraph/aave/protocol-v2)  // TODO
--  [Aurora Testnet](https://thegraph.com/hosted-service/subgraph/aave/protocol-v2-testnet)  // TODO
+-  [Aurora Mainnet](https://thegraph.com/hosted-service/subgraph/australisfinance/australis)
+-  [Aurora Testnet](https://thegraph.com/hosted-service/subgraph/australisfinance/australis-testnet)
 - TheGraph is not available yet on Harmony
 
 ## Usage
