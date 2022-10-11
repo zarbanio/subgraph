@@ -213,8 +213,11 @@ curl --location --request POST 'https://api.thegraph.com/index-node/graphql' --d
 ```
 npm i
 npm run generate:schema
-npm run prepare:subgraph:aurora
-(Testnet: npm run prepare:subgraph:aurora-testnet)
+
+for mainnet:
+    npm run prepare:subgraph:aurora-mainnet
+for testnet:
+    npm run prepare:subgraph:aurora-testnet
 
 docker-compose up -d
 npx graph create --node http://127.0.0.1:8020 australis
