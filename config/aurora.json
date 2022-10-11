@@ -1,9 +1,0 @@
-{
-  "network": "aurora",
-  "ValouraOracleAddress": "0x0bdb51F09b0D1C79Ff2750974073d4258C7164Ca",
-  "ValouraOracleStartBlock": 68268426,
-  "LendingPoolAddressesProviderRegistryAddress": "0xC6FCCd491e4C77714EdFa2D8D0Cb23c99Bf3Eb28",
-  "LendingPoolAddressesProviderRegistryStartBlock": 68261074,
-  "ChainlinkSourcesRegistryAddress": "0x0000000000000000000000000000000000000000",
-  "ChainlinkSourcesRegistryStartBlock": 0,
-}

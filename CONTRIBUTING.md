@@ -1,4 +1,4 @@
-To submit a change request to the Aave protocol subgraphs, please create a test deployment of your subgraph with the applied changes.
+To submit a change request to the Australis protocol subgraphs, please create a test deployment of your subgraph with the applied changes.
 
 To do this you can create an account on [The Graph hosted service](https://thegraph.com/hosted-service/dashboard), then follow the deployment section of the README.
 

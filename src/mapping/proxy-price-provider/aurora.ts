@@ -1,10 +1,5 @@
 import { PriceOracle, PriceOracleAsset } from '../../../generated/schema';
-import {
-    AustralisOracle,
-    AssetSourceUpdated,
-    BaseCurrencySet,
-    FallbackOracleUpdated
-} from '../../../generated/AustralisOracle/AustralisOracle';
+import { AustralisOracle, AssetSourceUpdated, BaseCurrencySet } from '../../../generated/AustralisOracle/AustralisOracle';
 import { Address, ethereum, log } from '@graphprotocol/graph-ts';
 import {
     formatUsdEthChainlinkPrice,
@@ -15,17 +10,15 @@ import {
 } from '../../utils/converters';
 import { IExtendedPriceAggregator } from '../../../generated/AustralisOracle/IExtendedPriceAggregator';
 import { EACAggregatorProxy } from '../../../generated/AustralisOracle/EACAggregatorProxy';
-import {
-    ChainlinkAggregator as ChainlinkAggregatorContract,
-    FallbackPriceOracle as FallbackPriceOracleContract
-} from '../../../generated/templates';
+import { ChainlinkAggregator as ChainlinkAggregatorContract } from '../../../generated/templates';
 import {
     getChainlinkAggregator,
     getOrInitPriceOracle,
     getPriceOracleAsset,
 } from '../../helpers/initializers';
-import {MOCK_USD_ADDRESS, ZERO_ADDRESS} from '../../utils/constants';
+import { MOCK_USD_ADDRESS } from '../../utils/constants';
 import { genericPriceUpdate, usdEthPriceUpdate } from '../../helpers/price-updates';
+export { handleFallbackOracleUpdated } from './proxy-price-provider';
 
 export function priceFeedUpdated(
     event: ethereum.Event,
@@ -75,8 +68,8 @@ export function priceFeedUpdated(
             // so it has been registered badly.
             if (aggregatorAddressCall.reverted) {
                 log.error(
-                    `PROXY: Simple Type must be a chainlink proxy. || asset: {} | assetOracleAddress: {}`,
-                    [sAssetAddress, assetOracleAddress.toHexString()]
+                    `PROXY: Simple Type must be a chainlink proxy. || asset: {} | assetOracleAddress: {} | tx hash: {}`,
+                    [sAssetAddress, assetOracleAddress.toHexString(), event.transaction.hash.toHexString()]
                 );
                 return;
             }
@@ -164,42 +157,6 @@ export function priceFeedUpdated(
         priceOracle.save();
 
         genericPriceUpdate(priceOracleAsset, priceFromOracle, event);
-    }
-}
-
-export function handleFallbackOracleUpdated(event: FallbackOracleUpdated): void {
-    let priceOracle = getOrInitPriceOracle();
-
-    priceOracle.fallbackPriceOracle = event.params.fallbackOracle;
-    if (event.params.fallbackOracle.toHexString() != ZERO_ADDRESS) {
-        FallbackPriceOracleContract.create(event.params.fallbackOracle);
-
-        // update prices on assets which use fallback
-
-        let proxyPriceProvider = AustralisOracle.bind(event.address);
-        for (let i = 0; i < priceOracle.tokensWithFallback.length; i++) {
-            let token = priceOracle.tokensWithFallback[i];
-            let priceOracleAsset = getPriceOracleAsset(token);
-            if (
-                priceOracleAsset.priceSource.equals(zeroAddress()) ||
-                priceOracleAsset.isFallbackRequired
-            ) {
-                let price = proxyPriceProvider.try_getAssetPrice(Address.fromString(priceOracleAsset.id));
-                if (!price.reverted) {
-                    genericPriceUpdate(priceOracleAsset, price.value, event);
-                } else {
-                    log.error(
-                        'OracleAssetId: {} | ProxyPriceProvider: {} | FallbackOracle: {} | EventAddress: {}',
-                        [
-                            priceOracleAsset.id,
-                            event.address.toHexString(),
-                            event.params.fallbackOracle.toHexString(),
-                            event.address.toHexString(),
-                        ]
-                    );
-                }
-            }
-        }
     }
 }
 

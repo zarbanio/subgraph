@@ -113,9 +113,10 @@ export function handleAddressSet(event: AddressSet): void {
   if (mappedId != '') {
     genericAddressProviderUpdate(mappedId, event.params.newAddress, event, false);
   } else {
-    log.error('Address set: {} | Contract ID: {}', [
+    log.error('Address set: {} | Contract ID: {} | Tx Hash: {}', [
       event.params.newAddress.toHexString(),
       event.params.id.toString(),
+      event.transaction.hash.toHexString(),
     ]);
   }
 }
