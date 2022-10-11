@@ -1,6 +1,6 @@
 specVersion: 0.0.4
 description: Australis protocol subgraph
-repository: https://github.com/aave/protocol-subgraphs  //TODO
+repository: https://github.com/australisfinance/subgraph
 schema:
   file: ./schema.graphql
 dataSources:
