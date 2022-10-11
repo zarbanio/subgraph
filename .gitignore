@@ -1,6 +1,9 @@
 # Dependency directories
 node_modules/
 
+# environment variable
+.env
+
 # generated files
 generated
 schema.graphql
