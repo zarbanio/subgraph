@@ -9,8 +9,8 @@
     "subgraph:codegen": "graph codegen --output-dir ./generated",
     "subgraph:build": "graph build",
     "subgraph:deploy:hosted": "graph deploy --product hosted-service $SLUG --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --access-token $ACCESS_TOKEN",
-    "deploy:hosted:mainnet": "VERSION=v2 BLOCKCHAIN=auroa NETWORK=mainnet env-cmd npm run prepare:subgraph:aurora-mainnet && SLUG=australisfinance/australis env-cmd npm run subgraph:deploy:hosted",
-    "deploy:hosted:testnet": "VERSION=v2 BLOCKCHAIN=auroa NETWORK=testnet env-cmd npm run prepare:subgraph:aurora-testnet && SLUG=australisfinance/australis-testnet env-cmd npm run subgraph:deploy:hosted"
+    "deploy:hosted:mainnet": "npm run prepare:subgraph:aurora-mainnet && SLUG=australisfinance/australis env-cmd npm run subgraph:deploy:hosted",
+    "deploy:hosted:testnet": "npm run prepare:subgraph:aurora-testnet && SLUG=australisfinance/australis-testnet env-cmd npm run subgraph:deploy:hosted"
   },
   "repository": {
     "type": "git",
