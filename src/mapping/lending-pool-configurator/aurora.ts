@@ -3,13 +3,13 @@ import { ReserveInitialized } from '../../../generated/templates/LendingPoolConf
 import { IERC20Detailed } from '../../../generated/templates/LendingPoolConfigurator/IERC20Detailed';
 import { IERC20DetailedBytes } from '../../../generated/templates/LendingPoolConfigurator/IERC20DetailedBytes';
 import {
-    AToken as ATokenContract,
+    AstToken as AstTokenContract,
     StableDebtToken as STokenContract,
     VariableDebtToken as VTokenContract,
 } from '../../../generated/templates';
 import {
     createMapContractToPool,
-    getOrInitAToken,
+    getOrInitAstToken,
     getOrInitSToken,
     getOrInitVToken,
     getOrInitReserve,
@@ -26,7 +26,7 @@ export {
     handleReserveUnfreezed,
     handleVariableDebtTokenUpgraded,
     handleStableDebtTokenUpgraded,
-    handleATokenUpgraded,
+    handleAstTokenUpgraded,
     handleReserveDecimalsChanged,
     handleReserveFactorChanged,
     handleCollateralConfigurationChanged,
@@ -61,13 +61,13 @@ export function handleReserveInitialized(event: ReserveInitialized): void {
 
     updateInterestRateStrategy(reserve, event.params.interestRateStrategyAddress, true);
 
-    ATokenContract.create(Address.fromString(event.params.aToken.toHexString()));
-    createMapContractToPool(event.params.aToken, reserve.pool);
-    let aToken = getOrInitAToken(event.params.aToken);
-    aToken.underlyingAssetAddress = reserve.underlyingAsset;
-    aToken.underlyingAssetDecimals = reserve.decimals;
-    aToken.pool = reserve.pool;
-    aToken.save();
+    AstTokenContract.create(Address.fromString(event.params.astToken.toHexString()));
+    createMapContractToPool(event.params.astToken, reserve.pool);
+    let astToken = getOrInitAstToken(event.params.astToken);
+    astToken.underlyingAssetAddress = reserve.underlyingAsset;
+    astToken.underlyingAssetDecimals = reserve.decimals;
+    astToken.pool = reserve.pool;
+    astToken.save();
 
     STokenContract.create(event.params.stableDebtToken);
     createMapContractToPool(event.params.stableDebtToken, reserve.pool);
@@ -85,7 +85,7 @@ export function handleReserveInitialized(event: ReserveInitialized): void {
     vToken.pool = reserve.pool;
     vToken.save();
 
-    reserve.aToken = aToken.id;
+    reserve.astToken = astToken.id;
     reserve.sToken = sToken.id;
     reserve.vToken = vToken.id;
     reserve.isActive = true;

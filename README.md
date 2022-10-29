@@ -33,7 +33,7 @@ The aave-utilities library includes a [`formatReserves`](https://github.com/aave
 
 Why does the raw subgraph data not match app.aave.com?
 
- - aToken and debtToken balances are continuously increasing. The subgraph provides a snapshot of the balance at the time of indexing (not querying), which means fields affected by interest such as `totalLiquidity`, `availableLiquidity`, and `totalCurrentVariableDebt` will need to be formatted to get real-time values
+ - astToken and debtToken balances are continuously increasing. The subgraph provides a snapshot of the balance at the time of indexing (not querying), which means fields affected by interest such as `totalLiquidity`, `availableLiquidity`, and `totalCurrentVariableDebt` will need to be formatted to get real-time values
  - All rates (liquidityRate, variableBorrowRate, stableBorrowRate) are expressed as *APR* with RAY units (10**27). To convert to the APY percentage as shown on the Aave frontend: `supplyAPY = (((1  +  ((liquidityRate / 10**27) /  31536000))  ^  31536000)  -  1) * 100`. [`formatReserves`](https://github.com/aave/aave-utilities/#formatReserves) will perform this calculation for you.
 
 </details>
@@ -50,7 +50,7 @@ The aave-utilities library includes a [`formatUserSummary`](https://github.com/a
 
 Why does the raw subgraph data not match my account balances on app.aave.com?
 
- - aToken and debtToken balances are continuously increasing. The subgraph provides a snapshot of the balance at the time of indexing (not querying), which means fields affected by interest such as `currentATokenBalance`, `currentVariableDebt`, and `currentStableDebt` will need to be formatted to get the real-time values
+ - astToken and debtToken balances are continuously increasing. The subgraph provides a snapshot of the balance at the time of indexing (not querying), which means fields affected by interest such as `currentAstTokenBalance`, `currentVariableDebt`, and `currentStableDebt` will need to be formatted to get the real-time values
 
 
 #### Transaction History

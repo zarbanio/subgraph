@@ -12,13 +12,13 @@ import {
   ReserveInterestRateStrategyChanged,
   ReserveFactorChanged,
   ReserveDecimalsChanged,
-  ATokenUpgraded,
+  AstTokenUpgraded,
   StableDebtTokenUpgraded,
   VariableDebtTokenUpgraded,
 } from '../../../generated/templates/LendingPoolConfigurator/LendingPoolConfigurator';
 import { DefaultReserveInterestRateStrategy } from '../../../generated/templates/LendingPoolConfigurator/DefaultReserveInterestRateStrategy';
 import {
-  getOrInitAToken,
+  getOrInitAstToken,
   getOrInitReserve,
   getOrInitReserveConfigurationHistoryItem,
 } from '../../helpers/initializers';
@@ -80,7 +80,7 @@ export function handleReserveInterestRateStrategyChanged(
   //////
   let reserve = getOrInitReserve(event.params.asset, event);
   // if reserve is not initialize, needed to handle ropsten wrong deployment
-  if (reserve.aToken == zeroAddress().toHexString()) {
+  if (reserve.astToken == zeroAddress().toHexString()) {
     return;
   }
   updateInterestRateStrategy(reserve, event.params.strategy, false);
@@ -157,19 +157,19 @@ export function handleReserveDecimalsChanged(event: ReserveDecimalsChanged): voi
   saveReserve(reserve, event);
 }
 
-export function handleATokenUpgraded(event: ATokenUpgraded): void {
-  let aToken = getOrInitAToken(event.params.proxy);
-  aToken.tokenContractImpl = event.params.implementation;
-  aToken.save();
+export function handleAstTokenUpgraded(event: AstTokenUpgraded): void {
+  let astToken = getOrInitAstToken(event.params.proxy);
+  astToken.tokenContractImpl = event.params.implementation;
+  astToken.save();
 }
 
 export function handleStableDebtTokenUpgraded(event: StableDebtTokenUpgraded): void {
-  let sToken = getOrInitAToken(event.params.proxy);
+  let sToken = getOrInitAstToken(event.params.proxy);
   sToken.tokenContractImpl = event.params.implementation;
   sToken.save();
 }
 export function handleVariableDebtTokenUpgraded(event: VariableDebtTokenUpgraded): void {
-  let vToken = getOrInitAToken(event.params.proxy);
+  let vToken = getOrInitAstToken(event.params.proxy);
   vToken.tokenContractImpl = event.params.implementation;
   vToken.save();
 }

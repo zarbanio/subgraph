@@ -226,7 +226,7 @@ export function handleFlashLoan(event: FlashLoan): void {
 
   poolReserve.lifetimeFlashLoans = poolReserve.lifetimeFlashLoans.plus(event.params.amount);
   poolReserve.lifetimeFlashLoanPremium = poolReserve.lifetimeFlashLoanPremium.plus(premium);
-  poolReserve.totalATokenSupply = poolReserve.totalATokenSupply.plus(premium);
+  poolReserve.totalAstTokenSupply = poolReserve.totalAstTokenSupply.plus(premium);
 
   poolReserve.save();
 
@@ -292,12 +292,12 @@ export function handleReserveDataUpdated(event: ReserveDataUpdated): void {
   let prevTimestamp = BigInt.fromI32(reserve.lastUpdateTimestamp);
   if (timestamp.gt(prevTimestamp)) {
     let growth = calculateGrowth(
-      reserve.totalATokenSupply,
+      reserve.totalAstTokenSupply,
       reserve.liquidityRate,
       prevTimestamp,
       timestamp
     );
-    reserve.totalATokenSupply = reserve.totalATokenSupply.plus(growth);
+    reserve.totalAstTokenSupply = reserve.totalAstTokenSupply.plus(growth);
     reserve.lifetimeDepositorsInterestEarned = reserve.lifetimeDepositorsInterestEarned.plus(
       growth
     );

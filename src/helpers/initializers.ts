@@ -1,6 +1,6 @@
 import { Bytes, ethereum, log } from '@graphprotocol/graph-ts';
 import {
-  AToken,
+  AstToken,
   SToken,
   VToken,
   PriceOracle,
@@ -23,7 +23,7 @@ import {
   zeroBD,
   zeroBI,
 } from '../utils/converters';
-import { getAtokenId, getReserveId, getUserReserveId } from '../utils/id-generation';
+import { getAstTokenId, getReserveId, getUserReserveId } from '../utils/id-generation';
 
 export function getProtocol(): Protocol {
   let protocolId = '1';
@@ -81,10 +81,10 @@ function initUserReserve(
     userReserve = new UserReserve(userReserveId);
     userReserve.pool = poolId;
     userReserve.usageAsCollateralEnabledOnUser = false;
-    userReserve.scaledATokenBalance = zeroBI();
+    userReserve.scaledAstTokenBalance = zeroBI();
     userReserve.scaledVariableDebt = zeroBI();
     userReserve.principalStableDebt = zeroBI();
-    userReserve.currentATokenBalance = zeroBI();
+    userReserve.currentAstTokenBalance = zeroBI();
     userReserve.currentVariableDebt = zeroBI();
     userReserve.currentStableDebt = zeroBI();
     userReserve.stableBorrowRate = zeroBI();
@@ -96,10 +96,10 @@ function initUserReserve(
     userReserve.stableBorrowLastUpdateTimestamp = 0;
 
     // incentives
-    userReserve.aTokenincentivesUserIndex = zeroBI();
+    userReserve.astTokenincentivesUserIndex = zeroBI();
     userReserve.vTokenincentivesUserIndex = zeroBI();
     userReserve.sTokenincentivesUserIndex = zeroBI();
-    userReserve.aIncentivesLastUpdateTimestamp = 0;
+    userReserve.astIncentivesLastUpdateTimestamp = 0;
     userReserve.vIncentivesLastUpdateTimestamp = 0;
     userReserve.sIncentivesLastUpdateTimestamp = 0;
 
@@ -187,7 +187,7 @@ export function getOrInitReserve(underlyingAsset: Bytes, event: ethereum.Event):
     reserve.stableRateSlope2 = zeroBI();
     reserve.utilizationRate = zeroBD();
     reserve.totalLiquidity = zeroBI();
-    reserve.totalATokenSupply = zeroBI();
+    reserve.totalAstTokenSupply = zeroBI();
     reserve.totalLiquidityAsCollateral = zeroBI();
     reserve.availableLiquidity = zeroBI();
     reserve.liquidityRate = zeroBI();
@@ -197,18 +197,18 @@ export function getOrInitReserve(underlyingAsset: Bytes, event: ethereum.Event):
     reserve.liquidityIndex = zeroBI();
     reserve.variableBorrowIndex = zeroBI();
     reserve.reserveFactor = zeroBI(); // TODO: is default 0?
-    reserve.aToken = zeroAddress().toHexString();
+    reserve.astToken = zeroAddress().toHexString();
     reserve.vToken = zeroAddress().toHexString();
     reserve.sToken = zeroAddress().toHexString();
 
     // incentives
-    reserve.aEmissionPerSecond = zeroBI();
+    reserve.astEmissionPerSecond = zeroBI();
     reserve.vEmissionPerSecond = zeroBI();
     reserve.sEmissionPerSecond = zeroBI();
-    reserve.aTokenIncentivesIndex = zeroBI();
+    reserve.astTokenIncentivesIndex = zeroBI();
     reserve.vTokenIncentivesIndex = zeroBI();
     reserve.sTokenIncentivesIndex = zeroBI();
-    reserve.aIncentivesLastUpdateTimestamp = 0;
+    reserve.astIncentivesLastUpdateTimestamp = 0;
     reserve.vIncentivesLastUpdateTimestamp = 0;
     reserve.sIncentivesLastUpdateTimestamp = 0;
 
@@ -242,7 +242,7 @@ export function getOrInitReserve(underlyingAsset: Bytes, event: ethereum.Event):
       priceOracleAsset.save();
     }
     reserve.price = priceOracleAsset.id;
-    // TODO: think about AToken
+    // TODO: think about AstToken
   }
   return reserve as Reserve;
 }
@@ -267,7 +267,7 @@ export function getChainlinkAggregator(id: string): ChainlinkAggregator {
 }
 
 export function getOrInitSToken(sTokenAddress: Bytes): SToken {
-  let sTokenId = getAtokenId(sTokenAddress);
+  let sTokenId = getAstTokenId(sTokenAddress);
   let sToken = SToken.load(sTokenId);
   if (!sToken) {
     sToken = new SToken(sTokenId);
@@ -280,7 +280,7 @@ export function getOrInitSToken(sTokenAddress: Bytes): SToken {
 }
 
 export function getOrInitVToken(vTokenAddress: Bytes): VToken {
-  let vTokenId = getAtokenId(vTokenAddress);
+  let vTokenId = getAstTokenId(vTokenAddress);
   let vToken = VToken.load(vTokenId);
   if (!vToken) {
     vToken = new VToken(vTokenId);
@@ -292,17 +292,17 @@ export function getOrInitVToken(vTokenAddress: Bytes): VToken {
   return vToken as VToken;
 }
 
-export function getOrInitAToken(aTokenAddress: Bytes): AToken {
-  let aTokenId = getAtokenId(aTokenAddress);
-  let aToken = AToken.load(aTokenId);
-  if (!aToken) {
-    aToken = new AToken(aTokenId);
-    aToken.underlyingAssetAddress = new Bytes(1);
-    aToken.tokenContractImpl = zeroAddress();
-    aToken.pool = '';
-    aToken.underlyingAssetDecimals = 18;
+export function getOrInitAstToken(astTokenAddress: Bytes): AstToken {
+  let astTokenId = getAstTokenId(astTokenAddress);
+  let astToken = AstToken.load(astTokenId);
+  if (!astToken) {
+    astToken = new AstToken(astTokenId);
+    astToken.underlyingAssetAddress = new Bytes(1);
+    astToken.tokenContractImpl = zeroAddress();
+    astToken.pool = '';
+    astToken.underlyingAssetDecimals = 18;
   }
-  return aToken as AToken;
+  return astToken as AstToken;
 }
 
 export function getOrInitReserveParamsHistoryItem(
@@ -321,7 +321,7 @@ export function getOrInitReserveParamsHistoryItem(
     reserveParamsHistoryItem.liquidityIndex = zeroBI();
     reserveParamsHistoryItem.liquidityRate = zeroBI();
     reserveParamsHistoryItem.totalLiquidity = zeroBI();
-    reserveParamsHistoryItem.totalATokenSupply = zeroBI();
+    reserveParamsHistoryItem.totalAstTokenSupply = zeroBI();
     reserveParamsHistoryItem.availableLiquidity = zeroBI();
     reserveParamsHistoryItem.totalLiquidityAsCollateral = zeroBI();
     reserveParamsHistoryItem.priceInEth = zeroBI();

@@ -25,7 +25,7 @@
           "type": "address"
         }
       ],
-      "name": "ATokenUpgraded",
+      "name": "AstTokenUpgraded",
       "type": "event"
     },
     {
@@ -180,7 +180,7 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "aToken",
+          "name": "astToken",
           "type": "address"
         },
         {
@@ -441,7 +441,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "aTokenImpl",
+          "name": "astTokenImpl",
           "type": "address"
         },
         {
@@ -558,7 +558,7 @@
           "type": "address"
         }
       ],
-      "name": "updateAToken",
+      "name": "updateAstToken",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

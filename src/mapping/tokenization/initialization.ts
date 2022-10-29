@@ -1,4 +1,4 @@
-import { Initialized as ATokenInitialized } from '../../../generated/templates/AToken/AToken';
+import { Initialized as AstTokenInitialized } from '../../../generated/templates/AstToken/AstToken';
 import { Initialized as VTokenInitialized } from '../../../generated/templates/VariableDebtToken/VariableDebtToken';
 import { Initialized as STokenInitialized } from '../../../generated/templates/StableDebtToken/StableDebtToken';
 import { AustralisIncentivesController as AustralisIncentivesControllerTemplate } from '../../../generated/templates';
@@ -9,12 +9,12 @@ import {
   MapAssetPool,
 } from '../../../generated/schema';
 import { Address, log } from '@graphprotocol/graph-ts';
-import { IERC20Detailed } from '../../../generated/templates/AToken/IERC20Detailed';
+import { IERC20Detailed } from '../../../generated/templates/AstToken/IERC20Detailed';
 import { zeroAddress } from '../../utils/converters';
 export {
-  handleATokenBurn,
-  handleATokenMint,
-  handleATokenTransfer,
+  handleAstTokenBurn,
+  handleAstTokenMint,
+  handleAstTokenTransfer,
   handleVariableTokenBurn,
   handleVariableTokenMint,
   handleStableTokenMint,
@@ -66,7 +66,7 @@ function createIncentivesController(
   mapAssetPool.save();
 }
 
-export function handleATokenInitialized(event: ATokenInitialized): void {
+export function handleAstTokenInitialized(event: AstTokenInitialized): void {
   // log.warning('Incentives controller is 0x0 for asset: {} | underlyingasset: {} | pool: {}', []);
   createIncentivesController(
     event.address,

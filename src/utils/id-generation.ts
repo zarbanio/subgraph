@@ -26,6 +26,6 @@ export function getUserReserveId(
   return userAddress.toHexString() + underlyingAssetAddress.toHexString() + poolId;
 }
 
-export function getAtokenId(aTokenAddress: Bytes): string {
-  return aTokenAddress.toHexString();
+export function getAstTokenId(astTokenAddress: Bytes): string {
+  return astTokenAddress.toHexString();
 }

@@ -157,9 +157,9 @@ type VToken @entity {
   tokenContractImpl: Bytes!
 }
 
-type AToken @entity {
+type AstToken @entity {
   """
-  AToken address
+  AstToken address
   """
   id: ID!
   pool: Pool!
@@ -395,7 +395,7 @@ type ReserveParamsHistoryItem @entity {
   liquidityIndex: BigInt!
   liquidityRate: BigInt!
   totalLiquidity: BigInt!
-  totalATokenSupply: BigInt!
+  totalAstTokenSupply: BigInt!
   totalLiquidityAsCollateral: BigInt!
   availableLiquidity: BigInt!
   priceInEth: BigInt!
@@ -494,7 +494,7 @@ type Reserve @entity {
   reserveLiquidationBonus: BigInt!
   utilizationRate: BigDecimal! # default: 0
   totalLiquidity: BigInt! # default: 0
-  totalATokenSupply: BigInt!
+  totalAstTokenSupply: BigInt!
   totalLiquidityAsCollateral: BigInt! # default: 0
   availableLiquidity: BigInt! # default: 0
   totalPrincipalStableDebt: BigInt! # default: 0
@@ -507,7 +507,7 @@ type Reserve @entity {
   stableBorrowRate: BigInt!
   liquidityIndex: BigInt!
   variableBorrowIndex: BigInt!
-  aToken: AToken!
+  astToken: AstToken!
   vToken: VToken!
   sToken: SToken!
   reserveFactor: BigInt! #default 0
@@ -515,13 +515,13 @@ type Reserve @entity {
   stableDebtLastUpdateTimestamp: Int!
 
   # incentives
-  aEmissionPerSecond: BigInt!
+  astEmissionPerSecond: BigInt!
   vEmissionPerSecond: BigInt!
   sEmissionPerSecond: BigInt!
-  aTokenIncentivesIndex: BigInt!
+  astTokenIncentivesIndex: BigInt!
   vTokenIncentivesIndex: BigInt!
   sTokenIncentivesIndex: BigInt!
-  aIncentivesLastUpdateTimestamp: Int!
+  astIncentivesLastUpdateTimestamp: Int!
   vIncentivesLastUpdateTimestamp: Int!
   sIncentivesLastUpdateTimestamp: Int!
 
@@ -569,15 +569,15 @@ type WETHReserve @entity {
   updatedBlockNumber: BigInt!
 }
 
-type ATokenBalanceHistoryItem @entity {
+type AstTokenBalanceHistoryItem @entity {
   """
   userReserve + txHash
   """ # TODO: replace with blockNumber/timestamp + blockPosition
   id: ID!
   userReserve: UserReserve!
   timestamp: Int!
-  scaledATokenBalance: BigInt!
-  currentATokenBalance: BigInt!
+  scaledAstTokenBalance: BigInt!
+  currentAstTokenBalance: BigInt!
   index: BigInt!
 }
 
@@ -650,8 +650,8 @@ type UserReserve @entity {
   reserve: Reserve!
   user: User!
   usageAsCollateralEnabledOnUser: Boolean!
-  scaledATokenBalance: BigInt!
-  currentATokenBalance: BigInt!
+  scaledAstTokenBalance: BigInt!
+  currentAstTokenBalance: BigInt!
   scaledVariableDebt: BigInt!
   currentVariableDebt: BigInt!
   principalStableDebt: BigInt!
@@ -664,10 +664,10 @@ type UserReserve @entity {
   variableBorrowIndex: BigInt!
 
   # incentives
-  aTokenincentivesUserIndex: BigInt!
+  astTokenincentivesUserIndex: BigInt!
   vTokenincentivesUserIndex: BigInt!
   sTokenincentivesUserIndex: BigInt!
-  aIncentivesLastUpdateTimestamp: Int!
+  astIncentivesLastUpdateTimestamp: Int!
   vIncentivesLastUpdateTimestamp: Int!
   sIncentivesLastUpdateTimestamp: Int!
   """
@@ -678,7 +678,7 @@ type UserReserve @entity {
     @derivedFrom(field: "userReserve")
   variableTokenDelegatedAllowances: [VariableTokenDelegatedAllowance!]!
     @derivedFrom(field: "userReserve")
-  aTokenBalanceHistory: [ATokenBalanceHistoryItem!]! @derivedFrom(field: "userReserve")
+  astTokenBalanceHistory: [AstTokenBalanceHistoryItem!]! @derivedFrom(field: "userReserve")
   vTokenBalanceHistory: [VTokenBalanceHistoryItem!]! @derivedFrom(field: "userReserve")
   sTokenBalanceHistory: [STokenBalanceHistoryItem!]! @derivedFrom(field: "userReserve")
   #borrowStateHistory: [UserBorrowHistoryItem!]! @derivedFrom(field: "userReserve")

@@ -1,8 +1,8 @@
 import {
-  BalanceTransfer as ATokenTransfer,
-  Mint as ATokenMint,
-  Burn as ATokenBurn,
-} from '../../../generated/templates/AToken/AToken';
+  BalanceTransfer as AstTokenTransfer,
+  Mint as AstTokenMint,
+  Burn as AstTokenBurn,
+} from '../../../generated/templates/AstToken/AstToken';
 import {
   Mint as VTokenMint,
   Burn as VTokenBurn,
@@ -14,7 +14,7 @@ import {
   BorrowAllowanceDelegated as SBorrowAllowanceDelegated,
 } from '../../../generated/templates/StableDebtToken/StableDebtToken';
 import {
-  ATokenBalanceHistoryItem,
+  AstTokenBalanceHistoryItem,
   VTokenBalanceHistoryItem,
   STokenBalanceHistoryItem,
   UserReserve,
@@ -23,7 +23,7 @@ import {
   VariableTokenDelegatedAllowance,
 } from '../../../generated/schema';
 import {
-  getOrInitAToken,
+  getOrInitAstToken,
   getOrInitReserve,
   getOrInitUserReserve,
   getOrInitSToken,
@@ -42,15 +42,15 @@ function saveUserReserveAHistory(
   event: ethereum.Event,
   index: BigInt
 ): void {
-  let aTokenBalanceHistoryItem = new ATokenBalanceHistoryItem(
+  let astTokenBalanceHistoryItem = new AstTokenBalanceHistoryItem(
     userReserve.id + event.transaction.hash.toHexString()
   );
-  aTokenBalanceHistoryItem.scaledATokenBalance = userReserve.scaledATokenBalance;
-  aTokenBalanceHistoryItem.currentATokenBalance = userReserve.currentATokenBalance;
-  aTokenBalanceHistoryItem.userReserve = userReserve.id;
-  aTokenBalanceHistoryItem.index = index;
-  aTokenBalanceHistoryItem.timestamp = event.block.timestamp.toI32();
-  aTokenBalanceHistoryItem.save();
+  astTokenBalanceHistoryItem.scaledAstTokenBalance = userReserve.scaledAstTokenBalance;
+  astTokenBalanceHistoryItem.currentAstTokenBalance = userReserve.currentAstTokenBalance;
+  astTokenBalanceHistoryItem.userReserve = userReserve.id;
+  astTokenBalanceHistoryItem.index = index;
+  astTokenBalanceHistoryItem.timestamp = event.block.timestamp.toI32();
+  astTokenBalanceHistoryItem.save();
 }
 
 function saveUserReserveVHistory(
@@ -119,7 +119,7 @@ function saveReserve(reserve: Reserve, event: ethereum.Event): void {
   reserveParamsHistoryItem.stableBorrowRate = reserve.stableBorrowRate;
   reserveParamsHistoryItem.liquidityIndex = reserve.liquidityIndex;
   reserveParamsHistoryItem.liquidityRate = reserve.liquidityRate;
-  reserveParamsHistoryItem.totalATokenSupply = reserve.totalATokenSupply;
+  reserveParamsHistoryItem.totalAstTokenSupply = reserve.totalAstTokenSupply;
   reserveParamsHistoryItem.averageStableBorrowRate = reserve.averageStableRate;
   let priceOracleAsset = getPriceOracleAsset(reserve.price);
   reserveParamsHistoryItem.priceInEth = priceOracleAsset.priceInEth;
@@ -131,14 +131,14 @@ function saveReserve(reserve: Reserve, event: ethereum.Event): void {
 }
 
 function tokenBurn(event: ethereum.Event, from: Address, value: BigInt, index: BigInt): void {
-  let aToken = getOrInitAToken(event.address);
-  let userReserve = getOrInitUserReserve(from, aToken.underlyingAssetAddress, event);
-  let poolReserve = getOrInitReserve(aToken.underlyingAssetAddress, event);
+  let astToken = getOrInitAstToken(event.address);
+  let userReserve = getOrInitUserReserve(from, astToken.underlyingAssetAddress, event);
+  let poolReserve = getOrInitReserve(astToken.underlyingAssetAddress, event);
 
   let calculatedAmount = rayDiv(value, index);
 
-  userReserve.scaledATokenBalance = userReserve.scaledATokenBalance.minus(calculatedAmount);
-  userReserve.currentATokenBalance = rayMul(userReserve.scaledATokenBalance, index);
+  userReserve.scaledAstTokenBalance = userReserve.scaledAstTokenBalance.minus(calculatedAmount);
+  userReserve.currentAstTokenBalance = rayMul(userReserve.scaledAstTokenBalance, index);
   userReserve.variableBorrowIndex = poolReserve.variableBorrowIndex;
   userReserve.liquidityRate = poolReserve.liquidityRate;
 
@@ -149,7 +149,7 @@ function tokenBurn(event: ethereum.Event, from: Address, value: BigInt, index: B
   //   .minus(poolReserve.totalScaledVariableDebt);
 
   poolReserve.availableLiquidity = poolReserve.availableLiquidity.minus(value);
-  poolReserve.totalATokenSupply = poolReserve.totalATokenSupply.minus(value);
+  poolReserve.totalAstTokenSupply = poolReserve.totalAstTokenSupply.minus(value);
 
   poolReserve.totalLiquidity = poolReserve.totalLiquidity.minus(value);
   poolReserve.lifetimeWithdrawals = poolReserve.lifetimeWithdrawals.plus(value);
@@ -165,16 +165,16 @@ function tokenBurn(event: ethereum.Event, from: Address, value: BigInt, index: B
 }
 
 function tokenMint(event: ethereum.Event, from: Address, value: BigInt, index: BigInt): void {
-  let aToken = getOrInitAToken(event.address);
-  let poolReserve = getOrInitReserve(aToken.underlyingAssetAddress, event);
-  poolReserve.totalATokenSupply = poolReserve.totalATokenSupply.plus(value);
+  let astToken = getOrInitAstToken(event.address);
+  let poolReserve = getOrInitReserve(astToken.underlyingAssetAddress, event);
+  poolReserve.totalAstTokenSupply = poolReserve.totalAstTokenSupply.plus(value);
   // Check if we are minting to treasury for mainnet and polygon
   if (from.toHexString() != '0x467b92af281d14cb6809913ad016a607b5ba8a36') {
-    let userReserve = getOrInitUserReserve(from, aToken.underlyingAssetAddress, event);
+    let userReserve = getOrInitUserReserve(from, astToken.underlyingAssetAddress, event);
     let calculatedAmount = rayDiv(value, index);
 
-    userReserve.scaledATokenBalance = userReserve.scaledATokenBalance.plus(calculatedAmount);
-    userReserve.currentATokenBalance = rayMul(userReserve.scaledATokenBalance, index);
+    userReserve.scaledAstTokenBalance = userReserve.scaledAstTokenBalance.plus(calculatedAmount);
+    userReserve.currentAstTokenBalance = rayMul(userReserve.scaledAstTokenBalance, index);
 
     userReserve.liquidityRate = poolReserve.liquidityRate;
     userReserve.variableBorrowIndex = poolReserve.variableBorrowIndex;
@@ -204,28 +204,28 @@ function tokenMint(event: ethereum.Event, from: Address, value: BigInt, index: B
   }
 }
 
-export function handleATokenBurn(event: ATokenBurn): void {
+export function handleAstTokenBurn(event: AstTokenBurn): void {
   tokenBurn(event, event.params.from, event.params.value, event.params.index);
 }
 
-export function handleATokenMint(event: ATokenMint): void {
+export function handleAstTokenMint(event: AstTokenMint): void {
   tokenMint(event, event.params.from, event.params.value, event.params.index);
 }
 
-export function handleATokenTransfer(event: ATokenTransfer): void {
+export function handleAstTokenTransfer(event: AstTokenTransfer): void {
   tokenBurn(event, event.params.from, event.params.value, event.params.index);
   tokenMint(event, event.params.to, event.params.value, event.params.index);
 
-  // TODO: is this really necessary(from v1)? if we transfer aToken we are not moving the collateral (underlying token)
-  let aToken = getOrInitAToken(event.address);
+  // TODO: is this really necessary(from v1)? if we transfer astToken we are not moving the collateral (underlying token)
+  let astToken = getOrInitAstToken(event.address);
   let userFromReserve = getOrInitUserReserve(
     event.params.from,
-    aToken.underlyingAssetAddress,
+    astToken.underlyingAssetAddress,
     event
   );
-  let userToReserve = getOrInitUserReserve(event.params.to, aToken.underlyingAssetAddress, event);
+  let userToReserve = getOrInitUserReserve(event.params.to, astToken.underlyingAssetAddress, event);
 
-  let reserve = getOrInitReserve(aToken.underlyingAssetAddress, event);
+  let reserve = getOrInitReserve(astToken.underlyingAssetAddress, event);
   if (
     userFromReserve.usageAsCollateralEnabledOnUser &&
     !userToReserve.usageAsCollateralEnabledOnUser
@@ -418,7 +418,7 @@ export function handleStableTokenBurn(event: STokenBurn): void {
   // );
 
   poolReserve.totalLiquidity = poolReserve.totalLiquidity.plus(balanceIncrease);
-  poolReserve.totalATokenSupply = poolReserve.totalATokenSupply.plus(balanceIncrease);
+  poolReserve.totalAstTokenSupply = poolReserve.totalAstTokenSupply.plus(balanceIncrease);
 
   saveReserve(poolReserve, event);
 

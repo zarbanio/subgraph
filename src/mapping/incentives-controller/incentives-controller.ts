@@ -34,9 +34,9 @@ export function handleAssetConfigUpdated(event: AssetConfigUpdated): void {
   let reserve = Reserve.load(reserveId);
 
   if (reserve != null) {
-    if (asset.toHexString() == reserve.aToken) {
-      reserve.aEmissionPerSecond = emissionsPerSecond;
-      reserve.aIncentivesLastUpdateTimestamp = blockTimestamp;
+    if (asset.toHexString() == reserve.astToken) {
+      reserve.astEmissionPerSecond = emissionsPerSecond;
+      reserve.astIncentivesLastUpdateTimestamp = blockTimestamp;
     } else if (asset.toHexString() == reserve.vToken) {
       reserve.vEmissionPerSecond = emissionsPerSecond;
       reserve.vIncentivesLastUpdateTimestamp = blockTimestamp;
@@ -115,9 +115,9 @@ export function handleAssetIndexUpdated(event: AssetIndexUpdated): void {
   let reserve = Reserve.load(reserveId);
 
   if (reserve != null) {
-    if (asset.toHexString() == reserve.aToken) {
-      reserve.aTokenIncentivesIndex = index;
-      reserve.aIncentivesLastUpdateTimestamp = blockTimestamp;
+    if (asset.toHexString() == reserve.astToken) {
+      reserve.astTokenIncentivesIndex = index;
+      reserve.astIncentivesLastUpdateTimestamp = blockTimestamp;
     } else if (asset.toHexString() == reserve.vToken) {
       reserve.vTokenIncentivesIndex = index;
       reserve.vIncentivesLastUpdateTimestamp = blockTimestamp;
@@ -154,9 +154,9 @@ export function handleUserIndexUpdated(event: UserIndexUpdated): void {
 
   let reserve = Reserve.load(reserveId);
   if (userReserve != null && reserve != null) {
-    if (asset.toHexString() == reserve.aToken) {
-      userReserve.aTokenincentivesUserIndex = index;
-      userReserve.aIncentivesLastUpdateTimestamp = blockTimestamp;
+    if (asset.toHexString() == reserve.astToken) {
+      userReserve.astTokenincentivesUserIndex = index;
+      userReserve.astIncentivesLastUpdateTimestamp = blockTimestamp;
     } else if (asset.toHexString() == reserve.vToken) {
       userReserve.vTokenincentivesUserIndex = index;
       userReserve.vIncentivesLastUpdateTimestamp = blockTimestamp;
