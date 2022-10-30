@@ -1,7 +1,7 @@
 {
   "network": "aurora",
-  "AustralisOracleAddress": "0xa650daC1BD718e8479253b39b1ea1FACA5c6ac41",
-  "AustralisOracleStartBlock": 74385916,
-  "LendingPoolAddressesProviderRegistryAddress": "0xC40c5F1EFEeE81CeF9A473F49e2304AA2BE57c2a",
-  "LendingPoolAddressesProviderRegistryStartBlock": 74382663
+  "AustralisOracleAddress": "0x337084E8330572f7897F0cD52917771Dd93F2Df7",
+  "AustralisOracleStartBlock": 77340354,
+  "LendingPoolAddressesProviderRegistryAddress": "0xA02d11528FfBa3234939067A31FdE7Aea196Fa1b",
+  "LendingPoolAddressesProviderRegistryStartBlock": 77334992
 }
