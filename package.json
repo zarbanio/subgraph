@@ -1,48 +1,20 @@
 {
-  "name": "protocol-subgraphs",
-  "version": "1.0.0",
-  "description": "This package contains subgraphs of the Aave protocol v2 and v3",
+  "name": "test",
+  "license": "UNLICENSED",
   "scripts": {
-    "generate:schema": "cp ./schemas/v2.schema.graphql  schema.graphql",
-    "prepare:subgraph": "mustache ./config/aurora.json ./templates/aurora.subgraph.template.yaml > subgraph.yaml && rm -rf generated && npm run generate:schema && npm run subgraph:codegen && npm run subgraph:build",
-    "subgraph:codegen": "graph codegen --output-dir ./generated",
-    "subgraph:build": "graph build"
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/zarban-liquidity-market",
+    "create-local": "graph create --node http://localhost:8020/zarban-liquidity-market",
+    "remove-local": "graph remove --node http://localhost:8020/zarban-liquidity-market",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 zarban-liquidity-market",
+    "test": "graph test"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/aave/protocol-subgraphs"
-  },
-  "author": "AAVE <tech@aave.com>",
-  "contributors": [
-    {
-      "name": "Pol Sendra",
-      "email": "pol@aave.com"
-    },
-    {
-      "name": "Daniel Martin",
-      "email": "daniel@aave.com"
-    },
-    {
-      "name": "Andrey Kozlov",
-      "email": "andrey@aave.com"
-    },
-    {
-      "name": "Andrew Schmidt",
-      "email": "andrew@aave.com"
-    }
-  ],
-  "license": "MIT",
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.25.1",
-    "@graphprotocol/graph-ts": "0.24.1",
-    "env-cmd": "^10.1.0",
-    "mustache": "^3.1.0",
-    "typescript": "3.5.3",
-    "@typescript-eslint/eslint-plugin": "^2.0.0",
-    "@typescript-eslint/parser": "^2.0.0",
-    "eslint": "^6.2.2",
-    "eslint-config-prettier": "^6.1.0",
-    "lint-staged": "^9.2.5",
-    "prettier": "^1.18.2"
+    "@graphprotocol/graph-cli": "0.88.0",
+    "@graphprotocol/graph-ts": "0.32.0"
+  },
+  "devDependencies": {
+    "matchstick-as": "0.5.0"
   }
 }
