@@ -1,0 +1,23 @@
+{
+  "arbitrum-one": {
+    "LendingPoolAddressesProvider": {
+      "address": "0x11804AC1d57B8b703AEDDCcE3dDB54844d123632",
+      "startBlock": 0
+    },
+    "LendingPool": {
+      "address": "0x381D5e078b8ce96489517E326377eF6BEE815D5c"
+    },
+    "LendingPoolConfigurator": {
+      "address": "0x4a8b4893B1225F2c0D9175Df146b4E0110bf20C6"
+    },
+    "ZToken": {
+      "address": "0x33082B91526decc560FE4FFA002353fD05f75a3a"
+    },
+    "StableDebtToken": {
+      "address": "0x79DC35D2D66d89C5F2ca86346d9bC9cd4DCAD71B"
+    },
+    "VariableDebtToken": {
+      "address": "0xe5713E5c9CF9CA82c4dFB4E37603ac438f157B6b"
+    }
+  }
+}

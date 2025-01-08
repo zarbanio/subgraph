@@ -1,226 +1,123 @@
+# Zarban-Subgraph
 
-# Aave Protocol Subgraphs
+This project is a subgraph for the Zarban blockchain protocol. It indexes and queries data from the Zarban protocol (the Liquidity Market and Stablecoin System both), providing a GraphQL API for accessing the protocol's data.
 
-The Aave Protocol subgraphs index data from the protocol smart contracts, and expose a GraphQL endpoint hosted by [The Graph](https://thegraph.com).
+## Table of Contents
 
-- [Active Deployments](#active-deployments)
-- [Usage](#usage)
-- [Development](#deployment)
+- [Zarban-Subgraph](#zarban-subgraph)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Query Example 1: Get User Collateral and Debt Positions](#query-example-1-get-user-collateral-and-debt-positions)
+    - [Query Example 2: Get All Deposits for a User](#query-example-2-get-all-deposits-for-a-user)
+  - [Schema](#schema)
+  - [Contributing](#contributing)
 
- 
-## Active deployments
--  [ETH Mainnet V2](https://thegraph.com/hosted-service/subgraph/aave/protocol-v2)
--  [Polygon V2](https://thegraph.com/hosted-service/subgraph/aave/aave-v2-matic)
--  [Avalanche V2](https://thegraph.com/hosted-service/subgraph/aave/protocol-v2-avalanche)
--  [Polygon V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-polygon)
--  [Avalanche V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-avalanche)
--  [Arbitrum V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-arbitrum)
--  [Optimism V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-optimism)
--  [Fantom V3](https://thegraph.com/hosted-service/subgraph/aave/protocol-v3-fantom)
-- TheGraph is not available yet on Harmony
+## Introduction
+
+The Zarban-Subgraph is designed to index and query data from the Zarban blockchain protocol. It provides a GraphQL API that allows developers to access various data points from the protocol, such as collateral and debt positions, user transactions, protocol revenues, and more.
+
+## Installation
+
+To install and run the subgraph locally, follow these steps:
+
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/zarbanio/subgraph.git
+    cd subgraph
+    ```
+
+2. Install dependencies:
+    ```sh
+    npm install
+    ```
+
+3. Generate the subgraph code:
+    ```sh
+    npm codegen
+    ```
+
+4. Deploy the subgraph:
+    ```sh
+    graph auth --studio YOUR_DEPLOY_KEY
+    graph deploy SUBGRAPH_SLUG
+    ```
 
 ## Usage
-  
-Subgraphs can be queried directly from the graph explorer, or from [another application](https://thegraph.com/docs/en/developer/querying-from-your-app/). The following section gives common queries for Aave protocol data.
 
-### Queries
+Once the subgraph is deployed, you can query the data using the GraphQL API. Here are some example queries:
 
-See [TheGraph API](https://thegraph.com/docs/en/developer/graphql-api/) docs for a complete guide on querying capabilities.
-
-<details>
-  <summary>Reserve Data</summary>
-
-#### Reserve Summary
-
-The `reserve` entity gives data on the assets of the protocol including rates, configuration, and total supply/borrow amounts.
-
-The aave-utilities library includes a [`formatReserves`](https://github.com/aave/aave-utilities/#formatReserves) function which can be used to format all data into a human readable format. The queries to fetch data for passing into this function can be found [here](https://github.com/aave/aave-utilities#subgraph).
-
-
-Why does the raw subgraph data not match app.aave.com?
-
- - aToken and debtToken balances are continuously increasing. The subgraph provides a snapshot of the balance at the time of indexing (not querying), which means fields affected by interest such as `totalLiquidity`, `availableLiquidity`, and `totalCurrentVariableDebt` will need to be formatted to get real-time values
- - All rates (liquidityRate, variableBorrowRate, stableBorrowRate) are expressed as *APR* with RAY units (10**27). To convert to the APY percentage as shown on the Aave frontend: `supplyAPY = (((1  +  ((liquidityRate / 10**27) /  31536000))  ^  31536000)  -  1) * 100`. [`formatReserves`](https://github.com/aave/aave-utilities/#formatReserves) will perform this calculation for you.
-
-</details>
-
-
-<details>
-  <summary>User Data</summary>
-  
-#### User Summary
-
-The `userReserve` entity gives the supply and borrow balances for a particular user along with the underlying reserve data.
-
-The aave-utilities library includes a [`formatUserSummary`](https://github.com/aave/aave-utilities#formatUserSummary) function which can be used to format all data into a human readable format. The queries to fetch data for passing into this function can be found [here](https://github.com/aave/aave-utilities#subgraph).
-
-Why does the raw subgraph data not match my account balances on app.aave.com?
-
- - aToken and debtToken balances are continuously increasing. The subgraph provides a snapshot of the balance at the time of indexing (not querying), which means fields affected by interest such as `currentATokenBalance`, `currentVariableDebt`, and `currentStableDebt` will need to be formatted to get the real-time values
-
-
-#### Transaction History
-
-
-The `pool` parameter is the LendingPoolAddressesProvider (V2) or PoolAddressesProvider (V3) address which you can get from the [deployed contracts](https://docs.aave.com/developers/deployed-contracts/deployed-contracts) page.
-
-```
-userTransactions(
-    where: { user: "lowercase_user_address", pool: "lowercase_pool_addresses_provider" }
-    orderBy: timestamp
-    orderDirection: desc
-  ) {
-    id
-    timestamp
-    ... on Deposit {
-      amount
-      reserve {
-        symbol
-        decimals
-      }
-    }
-    ... on RedeemUnderlying {
-      amount
-      reserve {
-        symbol
-        decimals
-      }
-    }
-    ... on Borrow {
-      amount
-      borrowRateMode
-      borrowRate
-      stableTokenDebt
-      variableTokenDebt
-      reserve {
-        symbol
-        decimals
-      }
-    }
-    ... on UsageAsCollateral {
-      fromState
-      toState
-      reserve {
-        symbol
-      }
-    }
-    ... on Repay {
-      amount
-      reserve {
-        symbol
-        decimals
-      }
-    }
-    ... on Swap {
-      borrowRateModeFrom
-      borrowRateModeTo
-      variableBorrowRate
-      stableBorrowRate
-      reserve {
-        symbol
-        decimals
-      }
-    }
-    ... on LiquidationCall {
-      collateralAmount
-      collateralReserve {
-        symbol
-        decimals
-      }
-      principalAmount
-      principalReserve {
-        symbol
-        decimals
+### Query Example 1: Get User Collateral and Debt Positions
+```graphql
+{
+  urn(id:"userAddress-ilk") {
+    ownerAddress
+    collateralLocked
+    debt
+    availableToMint
+    availableToWithdraw
+    loanToValue
+    liquidationPrice
+    collateralizationRatio
+    normalizedDebt
+    ilk {
+      name
+      annualStabilityFee
+      minimumCollateralizationRatio
+      collateralToken {
+        name
+        lastPriceTOMAN
+        lastPriceUSD
       }
     }
   }
-```
-
-</details>
-
-<details>
-  <summary>Querying Tips</summary>
-
-### Historical Queries
-
-You can query for historical data by specifying a block number:
-
-```
-{
-	reserves(block: {number: 14568297}){
-  	symbol
-  	liquidityRate
-	}
 }
 ```
 
-To query based on a historical timestamp, you will need to convert the timstamp to the most recent block number, you will need to use an external tool such as [this](https://www.npmjs.com/package/ethereum-block-by-date).
-
-
-### Pagination
-  
- The Graph places a limit on the number of items which can returned by a single query (currently 100). To fetch a larger number of items, the `first` and `skip` parameters can be used to create paginated queries. 
-
-For example, if you wanted to fetch the first 200 transactions for an Aave market, you can't query 200 items at once, but you can achieve the same thing by concatenating the output of these queries:
-```
+### Query Example 2: Get All Deposits for a User
+```graphql
 {
-  userTransactions(orderBy: timestamp, orderDirection: asc, first: 100, skip: 0){
-    timestamp
+  account(id: "userAddress") {
+    deposits {
+      id
+      asset{
+        id
+        name
+      }
+      amount
+      timestamp
+    }
   }
 }
 ```
-```
-{
-  userTransactions(orderBy: timestamp, orderDirection: asc, first: 100, skip: 100){
-    timestamp
-  }
-}
-```
-</details>
 
-## Development
+## Schema
 
-```bash
+You can check out the data structures and relationships indexed from the Zarban protocol in the `schema.graphql` file.
 
-# copy env and adjust its content with your personal access token and subgraph name
+These are the most important entities:
 
-# you can get an access token from https://thegraph.com/explorer/dashboard
-cp .env.test .env
+- Liquidity Market Specific Properties
+  - _DefaultOracle
+- Stablecoin System Specific Properties
+  - _Ilk
+  - _Urn
+- Both
+  - Account
+  - Protocol
+  - Market
+  - UsageMetricsDailySnapshot
+  - UsageMetricsHourlySnapshot
+  - FinancialsDailySnapshot
+  - MarketDailySnapshot
+  - MarketHourlySnapshot
+  - Event (Deposit, Withdraw, Borrow, Repay, Transfer, FlashLoan)
+  - Position
 
-# install project dependencies
-npm i
+There are some other entities, but they are mostly helpers and not as useful as the ones mentioned above. Feel free to use them if needed.
+Entities whose names begin with “Lm” are specific to the liquidity market only.
 
-# to regenrate types if schema.graphql has changed
-npm run subgraph:codegen
+## Contributing
 
-# to run a test build of your subgraph
-npm run subgraph:build
-
-# now you're able to deploy to thegraph hosted service with one of the deploy commands:
-npm run deploy:hosted:mainnet
-
-```
-
-### Troubleshooting
-
-If a subgraph encounters an error while indexing, the logs on the explorer may not display the error. You can check for errors on a pending or synced subgraph with the following commands, replacing `aave/protocol-v2` with your subgraph name:
-
-Pending:
-```
-curl --location --request POST 'https://api.thegraph.com/index-node/graphql' --data-raw '{"query":"{ indexingStatusForPendingVersion(subgraphName: \"aave/protocol-v2\") { subgraph fatalError { message } nonFatalErrors {message } } }"}'
-```
-
-Synced:
-
-```
-curl --location --request POST 'https://api.thegraph.com/index-node/graphql' --data-raw '{"query":"{ indexingStatusForCurrentVersion(subgraphName: \"aave/protocol-v2\") { subgraph fatalError { message } nonFatalErrors {message } } }"}'
-```
-
-```
-docker-compose up -d
-npm i
-npm run generate:schema
-npm run prepare:subgraph
-npx graph create --node http://127.0.0.1:8020 valoura
-npx graph deploy valoura --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020
-```
+Contributions are welcome! Please open an issue or submit a pull request if you have any improvements or bug fixes.
