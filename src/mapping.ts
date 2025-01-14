@@ -1872,7 +1872,7 @@ export function handleVatFrob(event: VatFrobEvent): void {
 
   market.inputTokenPriceUSD = tokenPrice;
 
-  const tokenManager = new TokenManager(ZAR_ADDRESS, event);
+  const zar = new TokenManager(ZAR_ADDRESS, event);
   let deltaDebt = BIGINT_ZERO;
   let deltaDebtBD = BIGDECIMAL_ZERO;
 
@@ -1891,7 +1891,7 @@ export function handleVatFrob(event: VatFrobEvent): void {
     _ilk.save();
   }
 
-  const deltaDebtUSD = deltaDebtBD.times(tokenManager.getPriceUSD());
+  const deltaDebtUSD = deltaDebtBD.times(zar.getPriceUSD());
 
   log.info(
     "[handleVatFrob]inputTokenBal={}, inputTokenPrice={}, totalBorrowUSD={}",

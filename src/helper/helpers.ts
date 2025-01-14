@@ -50,6 +50,7 @@ import {
   Transaction,
   BIGDECIMAL_ONE_WAD,
   BIGDECIMAL_ONE_RAD,
+  VAT_ADDRESS,
 } from "./constants";
 import { ZToken } from "../../generated/LendingPool/ZToken";
 import { StableDebtToken } from "../../generated/LendingPool/StableDebtToken";
@@ -74,6 +75,7 @@ import { bigIntToBDUseDecimals } from "../utils/numbers";
 import { ZAR } from "../../generated/Vat/ZAR";
 import { AccountManager } from "./account";
 import { TokenManager } from "./token";
+import { Vat } from "../../generated/Vat/Vat";
 
 // returns the market based on any auxillary token
 // ie, outputToken, vToken, or sToken
@@ -573,8 +575,16 @@ export function updateMarket(
   market.totalValueLockedUSD = market.totalDepositBalanceUSD;
 
   if (deltaDebtUSD != BIGDECIMAL_ZERO) {
+    let vatContract = Vat.bind(Address.fromString(VAT_ADDRESS));
+  let debtCall = vatContract.try_ilks(Bytes.fromHexString(market.ilk!));
+  if (debtCall.reverted) {
+    log.warning("[updateProtocal]Failed to call Vat.debt; not updating protocol.totalBorrowBalanceUSD", []);
     market.totalBorrowBalanceUSD =
       market.totalBorrowBalanceUSD.plus(deltaDebtUSD);
+  } else {
+    const zar = new TokenManager(ZAR_ADDRESS, event);
+    market.totalBorrowBalanceUSD = debtCall.value.getArt().times(debtCall.value.getRate()).toBigDecimal().times(zar.getPriceUSD()).div(BIGDECIMAL_ONE_RAD);
+  }
     if (deltaDebtUSD.gt(BIGDECIMAL_ZERO)) {
       market.cumulativeBorrowUSD =
         market.cumulativeBorrowUSD.plus(deltaDebtUSD);
@@ -697,7 +707,6 @@ export function snapshotMarket(
 
   marketDailySnapshot.days = days;
   marketDailySnapshot.totalValueLockedUSD = market.totalValueLockedUSD;
-  marketDailySnapshot.totalBorrowBalanceUSD = market.totalBorrowBalanceUSD;
   marketDailySnapshot.cumulativeSupplySideRevenueUSD =
     market.cumulativeSupplySideRevenueUSD;
   marketDailySnapshot.cumulativeProtocolSideRevenueUSD =
