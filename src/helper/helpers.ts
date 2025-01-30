@@ -51,6 +51,7 @@ import {
   BIGDECIMAL_ONE_WAD,
   BIGDECIMAL_ONE_RAD,
   VAT_ADDRESS,
+  BIGINT_ONE_RAD,
 } from "./constants";
 import { ZToken } from "../../generated/LendingPool/ZToken";
 import { StableDebtToken } from "../../generated/LendingPool/StableDebtToken";
@@ -576,15 +577,15 @@ export function updateMarket(
 
   if (deltaDebtUSD != BIGDECIMAL_ZERO) {
     let vatContract = Vat.bind(Address.fromString(VAT_ADDRESS));
-  let debtCall = vatContract.try_ilks(Bytes.fromHexString(market.ilk!));
-  if (debtCall.reverted) {
-    log.warning("[updateProtocal]Failed to call Vat.debt; not updating protocol.totalBorrowBalanceUSD", []);
-    market.totalBorrowBalanceUSD =
-      market.totalBorrowBalanceUSD.plus(deltaDebtUSD);
-  } else {
-    const zar = new TokenManager(ZAR_ADDRESS, event);
-    market.totalBorrowBalanceUSD = debtCall.value.getArt().times(debtCall.value.getRate()).toBigDecimal().times(zar.getPriceUSD()).div(BIGDECIMAL_ONE_RAD);
-  }
+    let debtCall = vatContract.try_ilks(Bytes.fromHexString(market.ilk!));
+    if (debtCall.reverted) {
+      log.warning("[updateMarket]Failed to call Vat.debt; not updating protocol.totalBorrowBalanceUSD", []);
+      market.totalBorrowBalanceUSD =
+        market.totalBorrowBalanceUSD.plus(deltaDebtUSD);
+    } else {
+      const zar = new TokenManager(ZAR_ADDRESS, event);
+      market.totalBorrowBalanceUSD = debtCall.value.getArt().times(debtCall.value.getRate()).div(BIGINT_ONE_RAD).toBigDecimal().times(zar.getPriceUSD());
+    }
     if (deltaDebtUSD.gt(BIGDECIMAL_ZERO)) {
       market.cumulativeBorrowUSD =
         market.cumulativeBorrowUSD.plus(deltaDebtUSD);
@@ -1210,8 +1211,7 @@ export function transferPosition(
   }
   assert(
     transferAmount <= srcPosition.balance,
-    `[transferPosition]src ${srcUrn}/ilk ${ilk.toHexString()}/side ${side} transfer amount ${transferAmount.toString()} > balance ${
-      srcPosition.balance
+    `[transferPosition]src ${srcUrn}/ilk ${ilk.toHexString()}/side ${side} transfer amount ${transferAmount.toString()} > balance ${srcPosition.balance
     }`
   );
 

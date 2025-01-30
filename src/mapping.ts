@@ -1713,9 +1713,12 @@ export function handleVatRely(event: VatRelyEvent): void {
     tryPipSrc.value.toHexString(),
     tryDogIlk.value.getClip().toHexString()
   );
-  new TokenManager(tokenId, event);
+  const tokenManager = new TokenManager(tokenId, event, TokenType.NON_REBASING);
+  const token = tokenManager.getToken()
+  token._market = marketID;
+  token.save();
   // for protocol.mintedTokens
-  new TokenManager(ZAR_ADDRESS, event);
+  new TokenManager(ZAR_ADDRESS, event, TokenType.NON_REBASING);
 }
 
 export function handleVatCage(event: VatCageEvent): void {

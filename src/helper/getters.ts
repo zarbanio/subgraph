@@ -16,7 +16,6 @@ import {
   MarketHourlySnapshot,
   UsageMetricsHourlySnapshot,
   Liquidate,
-  _Chi,
   _Urn,
   _PositionCounter,
   Position,
@@ -450,8 +449,10 @@ export function getOrCreateMarket(
     market.save();
 
     const ilkIDList = protocol.ilkIDList;
-    ilkIDList.push(ilk.toHexString());
-    protocol.ilkIDList = ilkIDList;
+    if (ilk != Bytes.fromHexString("0x")) {
+      ilkIDList.push(ilk.toHexString());
+      protocol.ilkIDList = ilkIDList;
+    }
     const marketIDList = protocol.marketIDList;
     marketIDList.push(marketID);
     protocol.marketIDList = marketIDList;
@@ -483,7 +484,7 @@ export function getOrCreateIlk(
 
     _ilk = new _Ilk(ilk.toHexString());
     _ilk.marketAddress = marketID;
-    _ilk.name = market.name != null ? market.name!.replace("Stablecoin System","Ilk") : "unknown";
+    _ilk.name = market.name != null ? market.name!.replace("Stablecoin System", "Ilk") : "unknown";
     _ilk.collateralToken = market.inputToken;
     _ilk.minimumCollateralizationRatio = mat
       .toBigDecimal()
@@ -582,19 +583,6 @@ export function getOrCreateLiquidate(
     liquidate.save();
   }
   return liquidate;
-}
-
-
-export function getOrCreateChi(chiID: string): _Chi {
-  let _chi = _Chi.load(chiID);
-  if (_chi == null) {
-    _chi = new _Chi(chiID);
-    _chi.chi = BIGINT_ONE_RAY;
-    _chi.rho = BIGINT_ZERO;
-    _chi.save();
-  }
-
-  return _chi;
 }
 
 export function getOrCreatePosition(

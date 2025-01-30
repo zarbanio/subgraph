@@ -98,9 +98,9 @@ You can check out the data structures and relationships indexed from the Zarban 
 
 These are the most important entities:
 
-- Liquidity Market Specific Properties
+- Liquidity Market specific entities
   - _DefaultOracle
-- Stablecoin System Specific Properties
+- Stablecoin System specific entities
   - _Ilk
   - _Urn
 - Both

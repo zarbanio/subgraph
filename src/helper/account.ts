@@ -31,7 +31,6 @@ export class AccountManager {
       _account.transferredCount = INT_ZERO;
       _account.receivedCount = INT_ZERO;
       _account.flashloanCount = INT_ZERO;
-      _account._positionIDList = [];
       _account.save();
       this.isNew = true;
     } else {
