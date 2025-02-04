@@ -1,0 +1,443 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  # Liquidity Market Contracts
+  - kind: ethereum
+    name: LendingPoolAddressesProvider
+    network: arbitrum-one
+    source:
+      address: "0x11804AC1d57B8b703AEDDCcE3dDB54844d123632"
+      abi: LendingPoolAddressesProvider
+      startBlock: 160749055
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Protocol
+      abis:
+        - name: LendingPoolAddressesProvider
+          file: ./abis/LendingPoolAddressesProvider.json
+      eventHandlers:
+        - event: PriceOracleUpdated(indexed address)
+          handler: handlePriceOracleUpdated
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: LendingPool
+    network: arbitrum-one
+    source:
+      address: "0xC62545B7f466317b014773D1C605cA0D0931B0Fd"
+      abi: LendingPool
+      startBlock: 160751671
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Market
+        - Deposit
+        - Withdraw
+        - Repay
+        - Borrow
+        - Liquidate
+      abis:
+        - name: ZarbanIncentivesController
+          file: ./abis/ZarbanIncentivesController.json
+        - name: StakedZarban
+          file: ./abis/StakedZarban.json
+        - name: ZToken
+          file: ./abis/ZToken.json
+        - name: VariableDebtToken
+          file: ./abis/VariableDebtToken.json
+        - name: StableDebtToken
+          file: ./abis/StableDebtToken.json
+        - name: LendingPool
+          file: ./abis/LendingPool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: IPriceOracleGetter
+          file: ./abis/IPriceOracleGetter.json
+      eventHandlers:
+        - event: Deposit(indexed address,address,indexed address,uint256,indexed uint16)
+          handler: handleDeposit
+        - event: Withdraw(indexed address,indexed address,indexed address,uint256)
+          handler: handleWithdraw
+        - event: Borrow(indexed address,address,indexed address,uint256,uint256,uint256,indexed uint16)
+          handler: handleBorrow
+        - event: Repay(indexed address,indexed address,indexed address,uint256)
+          handler: handleRepay
+          receipt: true
+        - event: Swap(indexed address,indexed address,uint256)
+          handler: handleSwapBorrowRateMode
+        - event: LiquidationCall(indexed address,indexed address,indexed address,uint256,uint256,address,bool)
+          handler: handleLiquidationCall
+        - event: ReserveDataUpdated(indexed address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleReserveDataUpdated
+        - event: ReserveUsedAsCollateralEnabled(indexed address,indexed address)
+          handler: handleReserveUsedAsCollateralEnabled
+        - event: ReserveUsedAsCollateralDisabled(indexed address,indexed address)
+          handler: handleReserveUsedAsCollateralDisabled
+        - event: Paused()
+          handler: handlePaused
+        - event: Unpaused()
+          handler: handleUnpaused
+        - event: FlashLoan(indexed address,indexed address,indexed address,uint256,uint256,uint16)
+          handler: handleFlashloan
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: LendingPoolConfigurator
+    network: arbitrum-one
+    source:
+      address: "0x70c979a7930D94D1E06EF12dd72d8232f748bb78"
+      abi: LendingPoolConfigurator
+      startBlock: 160753996
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Market
+      abis:
+        - name: ZToken
+          file: ./abis/ZToken.json
+        - name: LendingPoolConfigurator
+          file: ./abis/LendingPoolConfigurator.json
+        - name: LendingPool
+          file: ./abis/LendingPool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+      eventHandlers:
+        - event: ReserveInitialized(indexed address,indexed address,address,address,address)
+          handler: handleReserveInitialized
+        - event: CollateralConfigurationChanged(indexed address,uint256,uint256,uint256)
+          handler: handleCollateralConfigurationChanged
+        - event: BorrowingEnabledOnReserve(indexed address,bool)
+          handler: handleBorrowingEnabledOnReserve
+        - event: BorrowingDisabledOnReserve(indexed address)
+          handler: handleBorrowingDisabledOnReserve
+        - event: ReserveActivated(indexed address)
+          handler: handleReserveActivated
+        - event: ReserveDeactivated(indexed address)
+          handler: handleReserveDeactivated
+        - event: ReserveFactorChanged(indexed address,uint256)
+          handler: handleReserveFactorChanged
+      file: ./src/mapping.ts
+
+  # Stablecoin system Contracts
+  - name: Vat
+    kind: ethereum
+    network: arbitrum-one
+    source:
+      abi: Vat
+      address: "0x975Eb113D580c44aa5676370E2CdF8f56bf3F99F"
+      startBlock: 77669795
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      abis:
+        - name: Vat
+          file: ./abis/Vat.json
+        - name: Spot
+          file: ./abis/Spot.json
+        - name: Dog
+          file: ./abis/Dog.json
+        - name: Jug
+          file: ./abis/Jug.json
+        - name: GemJoin
+          file: ./abis/GemJoin.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ZAR
+          file: ./abis/ZAR.json
+        - name: Pip
+          file: ./abis/Pip.json
+      entities:
+        - Market
+        - Token
+      eventHandlers:
+        # function rely(address usr)
+        # 0x65fae35e00000000000000000000000000000000000000000000000000000000
+        - event: Rely(indexed address)
+          handler: handleVatRely
+        # function cage()
+        - event: Cage()
+          handler: handleVatCage
+        ### CDP Manipulation ###
+        # function frob(bytes32 i, address u, address v, address w, int256 dink, int256 dart)
+        - event: Frob(bytes32,indexed address,indexed address,indexed address,int256,int256)
+          handler: handleVatFrob
+        ### CDP Confiscation
+        # function grab(bytes32 i, address u, address v, address w, int256 dink, int256 dart)
+        - event: Grab(bytes32,indexed address,indexed address,indexed address,int256,int256)
+          handler: handleVatGrab
+          receipt: true
+        # function fork( bytes32 ilk, address src, address dst, int256 dink, int256 dart)
+        - event: Fork(indexed bytes32,indexed address,indexed address,int256,int256)
+          handler: handleVatFork
+        ### Collect stability fee ###
+        # function fold(bytes32 i, address u, int256 rate)
+        - event: Fold(indexed bytes32,indexed address,indexed int256)
+          handler:
+            handleVatFold
+            ### Update collateral data ###
+        # function file(bytes32 ilk, bytes32 what, uint256 data)
+        - event: File(indexed bytes32,indexed bytes32,indexed uint256)
+          handler: handleVatFile
+
+  # Borrow rate
+  - name: Jug
+    kind: ethereum
+    network: arbitrum-one
+    source:
+      abi: Jug
+      address: "0xE959bfe924A175Cd7348b7435D33620ceDcfD7cC"
+      startBlock: 77669842
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      abis:
+        - name: Jug
+          file: ./abis/Jug.json
+        - name: ZAR
+          file: ./abis/ZAR.json
+      entities:
+        - Market
+      eventHandlers:
+        ### Change borrow interest rate ###
+        # function file(bytes32 ilk, bytes32 what, uint256 data)
+        - event: File(indexed bytes32,indexed bytes32,indexed uint256)
+          handler: handleJugFileDuty
+
+  #  Liaison between the oracles and core contracts
+  - name: Spot
+    kind: ethereum
+    network: arbitrum-one
+    source:
+      abi: Spot
+      address: "0xcAc6896D91A21c502e92D77c6d54455594D2eB22"
+      startBlock: 77669795
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      abis:
+        - name: Spot
+          file: ./abis/Spot.json
+        - name: ZAR
+          file: ./abis/ZAR.json
+        - name: IPriceOracleGetter
+          file: ./abis/IPriceOracleGetter.json
+      entities:
+        - _Ilk
+        - LendingProtocol
+      eventHandlers:
+        ### Setting mat & par (ltv ratio) ###
+        # file(bytes32 ilk, bytes32 what, uint256 data)
+        - event: File(indexed bytes32,indexed bytes32,uint256)
+          handler: handleSpotFileMat
+        # file(bytes32 what, uint256 data)
+        - event: File(bytes32,uint256)
+          handler: handleSpotFilePar
+        ### Update price ###
+        # event Poke(bytes32 ilk, bytes32 val, uint256 spot)
+        - event: Poke(bytes32,bytes32,uint256)
+          handler: handleSpotPoke
+
+  - name: Dog
+    kind: ethereum
+    network: arbitrum-one
+    source:
+      abi: Dog
+      address: "0x4eB5a223B2c797Dcc13297B3C002225b1770d837"
+      startBlock: 77669898
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      abis:
+        - name: Vat
+          file: ./abis/Vat.json
+        - name: Dog
+          file: ./abis/Dog.json
+        - name: ZAR
+          file: ./abis/ZAR.json
+      entities:
+        - Market
+        - Token
+      eventHandlers:
+        # flag loan for liquidation
+        - event: Bark(indexed bytes32,indexed address,uint256,uint256,uint256,address,indexed uint256)
+          handler: handleDogBark
+        # set liquidation penalty
+        # function file(bytes32 ilk, bytes32 what, uint256 data)
+        - event: File(indexed bytes32,indexed bytes32,uint256)
+          handler: handleDogFile
+
+  # User may interact w/ maker contracts via cdpmanger
+  - name: CdpManager
+    kind: ethereum
+    network: arbitrum-one
+    source:
+      abi: CdpManager
+      address: "0xe1063E05f94BeCAA1cACc917D0Dd19F6b2f3CB8a"
+      startBlock: 77672144
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      abis:
+        - name: CdpManager
+          file: ./abis/CdpManager.json
+        - name: ZAR
+          file: ./abis/ZAR.json
+        - name: Vat
+          file: ./abis/Vat.json
+      entities:
+        - _Proxy
+      eventHandlers:
+        - event: NewCdp(indexed address,indexed address,indexed uint256)
+          handler: handleNewCdp
+
+templates:
+  # Liquidity Market templates
+  - kind: ethereum
+    name: ZToken
+    network: arbitrum-one
+    source:
+      abi: ZToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        - name: ZToken
+          file: ./abis/ZToken.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: BalanceTransfer(indexed address,indexed address,uint256,uint256)
+          handler: handleCollateralTransfer
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: StableDebtToken
+    network: arbitrum-one
+    source:
+      abi: StableDebtToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        - name: StableDebtToken
+          file: ./abis/StableDebtToken.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: VariableDebtToken
+    network: arbitrum-one
+    source:
+      abi: VariableDebtToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        - name: VariableDebtToken
+          file: ./abis/VariableDebtToken.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      file: ./src/mapping.ts
+
+  - name: ZarbanOracle
+    kind: ethereum
+    network: arbitrum-one
+    source:
+      abi: IPriceOracleGetter
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - _DefaultOracle
+      abis:
+        - name: IPriceOracleGetter
+          file: ./abis/IPriceOracleGetter.json
+      eventHandlers:
+        - event: AssetSourceUpdated(indexed address,indexed address)
+          handler: handleZarbanOracleAssetSourceUpdated
+
+
+  # Stablecoin system templates
+  - name: Clip
+    kind: ethereum
+    network: arbitrum-one
+    source:
+      abi: Clip
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - Market
+      abis:
+        - name: Clip
+          file: ./abis/Clip.json
+        - name: ZAR
+          file: ./abis/ZAR.json
+      eventHandlers:
+        # collateral auction
+        - event: Take(indexed uint256,uint256,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleClipTakeBid
+        - event: Yank(uint256)
+          handler: handleClipYankBid
+
+  - name: Pip
+    kind: ethereum
+    network: arbitrum-one
+    source:
+      abi: Pip
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - _ilk
+      abis:
+        - name: Pip
+          file: ./abis/Pip.json
+      eventHandlers:
+        - event: LogValue(bytes32)
+          handler: handlePipLogValue

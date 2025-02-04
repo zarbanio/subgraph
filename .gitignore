@@ -1,10 +1,9 @@
 # Dependency directories
 node_modules/
+package-lock.json
 
 # generated files
 generated
-schema.graphql
-subgraph.yaml
 
 # builded files
 build
