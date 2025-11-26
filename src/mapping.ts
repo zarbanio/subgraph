@@ -1437,6 +1437,13 @@ function updateRewards(manager: DataManager, event: ethereum.Event): void {
   // Supply side the to address is the ZToken
   // Borrow side the to address is the variableDebtToken
   const market = manager.getMarket();
+
+  // FIX: Safety check for outputToken. If it doesn't exist, we can't process rewards.
+  if (!market.outputToken) {
+    log.warning("[updateRewards] Market {} has no outputToken, skipping rewards update", [market.id]);
+    return;
+  }
+
   const ZTokenContract = ZToken.bind(Address.fromString(market.outputToken!));
   const tryIncentiveController = ZTokenContract.try_getIncentivesController();
   if (tryIncentiveController.reverted) {
@@ -1449,9 +1456,17 @@ function updateRewards(manager: DataManager, event: ethereum.Event): void {
   const incentiveControllerContract = ZarbanIncentivesController.bind(
     tryIncentiveController.value
   );
-  const tryBorrowRewards = incentiveControllerContract.try_assets(
-    Address.fromString(market._vToken!)
-  );
+
+  // FIX: Handle _vToken separately. If it's null, we just skip the borrow rewards part
+  // instead of crashing the subgraph.
+  let tryBorrowRewards: ethereum.CallResult<ZarbanIncentivesController__assetsResult> | null = null;
+  
+  if (market._vToken) {
+    tryBorrowRewards = incentiveControllerContract.try_assets(
+      Address.fromString(market._vToken!)
+    );
+  }
+
   const trySupplyRewards = incentiveControllerContract.try_assets(
     Address.fromString(market.outputToken!)
   );
@@ -1515,7 +1530,9 @@ function updateRewards(manager: DataManager, event: ethereum.Event): void {
 
   // we check borrow first since it will show up first in graphql ordering
   // see explanation in docs/Mapping.md#Array Sorting When Querying
-  if (!tryBorrowRewards.reverted) {
+  
+  // FIX: Check if tryBorrowRewards is not null before checking reverted
+  if (tryBorrowRewards && !tryBorrowRewards.reverted) {
     // update borrow rewards
     const borrowRewardsPerDay = tryBorrowRewards.value.value0.times(
       BigInt.fromI32(SECONDS_PER_DAY)
@@ -1556,6 +1573,7 @@ function updateRewards(manager: DataManager, event: ethereum.Event): void {
     manager.updateRewards(depositRewardData);
   }
 }
+
 
 // It's the only way to get oracle's supported assets but since the AssetSources are usually set before setting the oracle to lending pool
 // it's not working.  so it is commented temporarily.
