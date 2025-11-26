@@ -203,9 +203,10 @@ export class SnapshotManager {
 
   createOrUpdateFinancials(): void {
     const days = this.event.block.timestamp.toI32() / SECONDS_PER_DAY;
-    const id = Bytes.fromI32(days).toHexString();
+    const id = days.toString();
     let snapshot = FinancialsDailySnapshot.load(id);
 
+    // Only create new snapshots, never update existing ones (entity is immutable)
     if (!snapshot) {
       snapshot = new FinancialsDailySnapshot(id);
       snapshot.days = days;
@@ -222,30 +223,29 @@ export class SnapshotManager {
       snapshot.dailyFlashloanUSD = BIGDECIMAL_ZERO;
       snapshot._dailyProtocolSideLiquidationRevenue = BIGDECIMAL_ZERO;
       snapshot._dailyProtocolSideStabilityFeeRevenue = BIGDECIMAL_ZERO;
+      snapshot.blockNumber = this.event.block.number;
+      snapshot.timestamp = this.event.block.timestamp;
+      snapshot.totalValueLockedUSD = this.protocol.totalValueLockedUSD;
+      snapshot.mintedTokenSupplies = this.protocol.mintedTokenSupplies;
+      snapshot._cumulativeProtocolSideLiquidationRevenue = this.protocol._cumulativeProtocolSideLiquidationRevenue;
+      snapshot._cumulativeProtocolSideStabilityFeeRevenue = this.protocol._cumulativeProtocolSideStabilityFeeRevenue;
+      snapshot.cumulativeSupplySideRevenueUSD =
+        this.protocol.cumulativeSupplySideRevenueUSD;
+      snapshot.cumulativeProtocolSideRevenueUSD =
+        this.protocol.cumulativeProtocolSideRevenueUSD;
+      snapshot.cumulativeTotalRevenueUSD =
+        this.protocol.cumulativeTotalRevenueUSD;
+      snapshot.revenueDetail = this.protocol.revenueDetail
+        ? this.getSnapshotRevenueDetail(this.protocol.revenueDetail!, days)
+        : null;
+      snapshot.totalDepositBalanceUSD = this.protocol.totalDepositBalanceUSD;
+      snapshot.cumulativeDepositUSD = this.protocol.cumulativeDepositUSD;
+      snapshot.totalBorrowBalanceUSD = this.protocol.totalBorrowBalanceUSD;
+      snapshot.cumulativeBorrowUSD = this.protocol.cumulativeBorrowUSD;
+      snapshot.cumulativeLiquidateUSD = this.protocol.cumulativeLiquidateUSD;
+
+      snapshot.save();
     }
-
-    snapshot.blockNumber = this.event.block.number;
-    snapshot.timestamp = this.event.block.timestamp;
-    snapshot.totalValueLockedUSD = this.protocol.totalValueLockedUSD;
-    snapshot.mintedTokenSupplies = this.protocol.mintedTokenSupplies;
-    snapshot._cumulativeProtocolSideLiquidationRevenue = this.protocol._cumulativeProtocolSideLiquidationRevenue;
-    snapshot._cumulativeProtocolSideStabilityFeeRevenue = this.protocol._cumulativeProtocolSideStabilityFeeRevenue;
-    snapshot.cumulativeSupplySideRevenueUSD =
-      this.protocol.cumulativeSupplySideRevenueUSD;
-    snapshot.cumulativeProtocolSideRevenueUSD =
-      this.protocol.cumulativeProtocolSideRevenueUSD;
-    snapshot.cumulativeTotalRevenueUSD =
-      this.protocol.cumulativeTotalRevenueUSD;
-    snapshot.revenueDetail = this.protocol.revenueDetail
-      ? this.getSnapshotRevenueDetail(this.protocol.revenueDetail!, days)
-      : null;
-    snapshot.totalDepositBalanceUSD = this.protocol.totalDepositBalanceUSD;
-    snapshot.cumulativeDepositUSD = this.protocol.cumulativeDepositUSD;
-    snapshot.totalBorrowBalanceUSD = this.protocol.totalBorrowBalanceUSD;
-    snapshot.cumulativeBorrowUSD = this.protocol.cumulativeBorrowUSD;
-    snapshot.cumulativeLiquidateUSD = this.protocol.cumulativeLiquidateUSD;
-
-    snapshot.save();
     this.financialSnapshot = snapshot;
   }
 
