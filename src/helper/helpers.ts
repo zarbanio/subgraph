@@ -816,16 +816,6 @@ export function updateFinancialsSnapshot(
   newSupplySideRevenueUSD: BigDecimal = BIGDECIMAL_ZERO,
   protocolSideRevenueType: u32 = 0
 ): void {
-  // Check if snapshot already exists - if so, skip update (entity is immutable)
-  const days = event.block.timestamp.toI32() / SECONDS_PER_DAY;
-  const id = days.toString();
-  const existingSnapshot = FinancialsDailySnapshot.load(id);
-  
-  if (existingSnapshot != null) {
-    // Snapshot already exists and is immutable, cannot update
-    return;
-  }
-
   const protocol = getOrCreateLendingProtocol();
   const financials = getOrCreateFinancials(event);
 
