@@ -107,7 +107,7 @@ import {
   _Cdpi,
   _Ilk,
 } from "../generated/schema";
-import { ZarbanIncentivesController } from "../generated/LendingPool/ZarbanIncentivesController";
+import { ZarbanIncentivesController, ZarbanIncentivesController__assetsResult } from "../generated/LendingPool/ZarbanIncentivesController";
 import { StakedZarban } from "../generated/LendingPool/StakedZarban";
 import {
   AssetSourceUpdated,

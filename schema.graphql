@@ -11,7 +11,7 @@ enum ProtocolType {
   # Will add more
 }
 
-type Token @entity @regularPolling {
+type Token @entity(immutable: false) @regularPolling {
   " Smart contract address of the token "
   id: ID!
 
@@ -57,7 +57,7 @@ enum RewardTokenType {
   STAKE
 }
 
-type LmRewardToken @entity @regularPolling {
+type LmRewardToken @entity(immutable: false) @regularPolling {
   " { Reward token type }-{ Smart contract address of the reward token } "
   id: ID!
 
@@ -160,7 +160,7 @@ enum PositionSide {
 # However, fixed term lending protocols can have multiple rates with
 # different duration/maturity per market. You can append a counter
 # to the IDs to differentiate.
-type LmInterestRate @entity @regularPolling {
+type LmInterestRate @entity(immutable: false) @regularPolling {
   " { Interest rate side }-{ Interest rate type }-{ Market ID }-{ Optional: Tranche }-{ Optional: # days/hours since epoch time } "
   id: ID!
 
@@ -200,7 +200,7 @@ enum FeeType {
   OTHER
 }
 
-type LmFEE @entity @regularPolling {
+type LmFEE @entity(immutable: false) @regularPolling {
   " { Fee type } "
   id: ID!
 
@@ -213,7 +213,7 @@ type LmFEE @entity @regularPolling {
 
 # This entity offers a more nuanced view of revenue types
 # Use this to provide the sources of revenue and amounts of each
-type LmRevenueDetail @entity @regularPolling {
+type LmRevenueDetail @entity(immutable: false) @regularPolling {
   " { Market/Protocol ID }{ Optional: Snapshot ID } "
   id: ID!
 
@@ -237,7 +237,7 @@ enum OracleSource {
 # Most lending protocols get token prices through onchain oracles.
 # As oracles are a source of truth it is important to understand the details.
 # This entity will help track oracle-related data in a market
-type LmOracle @entity @regularPolling {
+type LmOracle @entity(immutable: false) @regularPolling {
   " { Market Address }{ Token Address } "
   id: ID!
 
@@ -266,7 +266,7 @@ type LmOracle @entity @regularPolling {
 ##### Protocol Metadata #####
 #############################
 
-type Protocol @entity @regularPolling {
+type Protocol @entity(immutable: false) @regularPolling {
   " Smart contract address of the protocol's main contract (Factory, Registry, etc) "
   id: ID!
 
@@ -449,7 +449,7 @@ type Protocol @entity @regularPolling {
 ##### Protocol Timeseries #####
 ###############################
 
-type UsageMetricsDailySnapshot @entity @dailySnapshot {
+type UsageMetricsDailySnapshot @entity(immutable: true) @dailySnapshot {
   " ID is # of days since Unix epoch time "
   id: ID!
 
@@ -529,7 +529,7 @@ type UsageMetricsDailySnapshot @entity @dailySnapshot {
   timestamp: BigInt!
 }
 
-type UsageMetricsHourlySnapshot @entity @hourlySnapshot {
+type UsageMetricsHourlySnapshot @entity(immutable: true) @hourlySnapshot {
   " { # of hours since Unix epoch time } "
   id: ID!
 
@@ -570,7 +570,7 @@ type UsageMetricsHourlySnapshot @entity @hourlySnapshot {
   timestamp: BigInt!
 }
 
-type FinancialsDailySnapshot @entity @dailySnapshot {
+type FinancialsDailySnapshot @entity(immutable: true) @dailySnapshot {
   " ID is # of days since Unix epoch time "
   id: ID!
 
@@ -675,7 +675,7 @@ A market is defined by the input token.
 At a minimum that means being able to deposit/withdraw that token.
 e.g. there may be related markets as they only act as collateral for other markets.
 """
-type Market @entity @regularPolling {
+type Market @entity(immutable: false) @regularPolling {
   " Smart contract address of the market "
   id: ID!
 
@@ -917,7 +917,7 @@ type Market @entity @regularPolling {
 ##### Pool-Level Timeseries #####
 #################################
 
-type MarketDailySnapshot @entity @dailySnapshot {
+type MarketDailySnapshot @entity(immutable: true) @dailySnapshot {
   " { Smart contract address of the market }{ # of days since Unix epoch time } "
   id: ID!
 
@@ -1119,7 +1119,7 @@ type MarketDailySnapshot @entity @dailySnapshot {
   borrowingPositionCount: Int!
 }
 
-type MarketHourlySnapshot @entity @hourlySnapshot {
+type MarketHourlySnapshot @entity(immutable: true) @hourlySnapshot {
   " { Smart contract address of the market }{ # of hours since Unix epoch time } "
   id: ID!
 
@@ -1231,7 +1231,7 @@ type MarketHourlySnapshot @entity @hourlySnapshot {
 ##### Account-Level Data #####
 ##############################
 
-type Account @entity @regularPolling {
+type Account @entity(immutable: false) @regularPolling {
   " { Account address } "
   id: ID!
 
@@ -1309,7 +1309,7 @@ type Account @entity @regularPolling {
 }
 
 # A position is defined as who has control over the collateral or debt
-type Position @entity @regularPolling {
+type Position @entity(immutable: false) @regularPolling {
   " { Account address }-{ Market address }-{ Position Side }-{ Optional: Interest Rate Type}-{ Counter } "
   id: ID!
 
@@ -1453,7 +1453,7 @@ type _ActiveAccount @entity(immutable: true) {
 }
 
 # Helper entity for getting positions
-type _PositionCounter @entity {
+type _PositionCounter @entity(immutable: false) {
   " { Account address }-{ Market address }-{ Position Side } "
   id: ID!
 
@@ -1883,7 +1883,7 @@ type Flashloan implements Event @entity(immutable: true) @transaction {
   feeAmountUSD: BigDecimal
 }
 
-type _DefaultOracle @entity {
+type _DefaultOracle @entity(immutable: false) {
   " protocol id "
   id: ID!
   " address of default oracle "
@@ -1893,7 +1893,7 @@ type _DefaultOracle @entity {
 }
 
 # helper entity for flashloan premium
-type _FlashLoanPremium @entity {
+type _FlashLoanPremium @entity(immutable: false) {
   " protocol id "
   id: ID!
   " total premium rate "
@@ -1903,7 +1903,7 @@ type _FlashLoanPremium @entity {
 }
 
 # Helper entity for getting makertAddress from Ilk
-type _Ilk @entity @regularPolling {
+type _Ilk @entity(immutable: false) @regularPolling {
   " Ilk name referred to in maker contracts"
   id: ID!
 
@@ -1969,7 +1969,7 @@ type _Ilk @entity @regularPolling {
 }
 
 # Helper entity for liquidate transaction (Clip contract)
-type _ClipTakeStore @entity {
+type _ClipTakeStore @entity(immutable: false) {
   " { address of liquiditee }-{ ilk hexstring }-{ auction id }"
   id: ID!
   " slice number "
@@ -1994,7 +1994,7 @@ type _ClipTakeStore @entity {
 }
 
 # Helper entity for translating urnhandler address to owner address
-type _Urn @entity {
+type _Urn @entity(immutable: false) {
   " { owner address }-{ ilk }"
   id: ID!
 
@@ -2029,7 +2029,7 @@ type _Urn @entity {
   ilk: _Ilk!
 }
 
-type _Cdpi @entity {
+type _Cdpi @entity(immutable: false) {
   " { cdpi }"
   id: ID!
   " urn handler address"
