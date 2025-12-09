@@ -175,6 +175,13 @@ export function getBorrowBalances(market: Market, account: Address): BigInt[] {
 
 export function getCollateralBalance(market: Market, account: Address): BigInt {
   const collateralBalance = BIGINT_ZERO;
+  if (!market.outputToken) {
+    log.warning(
+      "[getCollateralBalance]market {} has no outputToken",
+      [market.id]
+    );
+    return collateralBalance;
+  }
   const ZTokenContract = ZToken.bind(Address.fromString(market.outputToken!));
   const balanceResult = ZTokenContract.try_balanceOf(account);
   if (balanceResult.reverted) {
@@ -195,6 +202,13 @@ export function getPrincipal(
   interestRateType: InterestRateType | null = null
 ): BigInt | null {
   if (side == PositionSide.COLLATERAL) {
+    if (!market.outputToken) {
+      log.warning(
+        "[getPrincipal]market {} has no outputToken",
+        [market.id]
+      );
+      return null;
+    }
     const ZTokenContract = ZToken.bind(Address.fromString(market.outputToken!));
     const scaledBalanceResult = ZTokenContract.try_scaledBalanceOf(account);
     if (scaledBalanceResult.reverted) {
@@ -207,6 +221,13 @@ export function getPrincipal(
     return scaledBalanceResult.value;
   } else if (side == PositionSide.BORROWER && interestRateType) {
     if (interestRateType == InterestRateType.STABLE) {
+      if (!market._sToken) {
+        log.warning(
+          "[getPrincipal]market {} has no _sToken",
+          [market.id]
+        );
+        return null;
+      }
       const stableDebtTokenContract = StableDebtToken.bind(
         Address.fromString(market._sToken!)
       );
@@ -221,6 +242,13 @@ export function getPrincipal(
       }
       return principalBalanceResult.value;
     } else if (interestRateType == InterestRateType.VARIABLE) {
+      if (!market._vToken) {
+        log.warning(
+          "[getPrincipal]market {} has no _vToken",
+          [market.id]
+        );
+        return null;
+      }
       const variableDebtTokenContract = VariableDebtToken.bind(
         Address.fromString(market._vToken!)
       );
