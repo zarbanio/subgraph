@@ -22,6 +22,7 @@ import {
   Token,
   Transfer,
   Withdraw,
+  _DefaultOracle,
 } from "../../generated/schema";
 import { AccountManager } from "./account";
 import {
@@ -33,6 +34,8 @@ import {
   PositionSide,
   Transaction,
   TransactionType,
+  ZERO_ADDRESS,
+  getNetworkSpecificConstant,
   insert,
 } from "./constants";
 import { SnapshotManager } from "./snapshots";
@@ -79,7 +82,6 @@ export class DataManager {
   private protocol!: Protocol;
   private market!: Market;
   private inputToken!: TokenManager;
-  private oracle!: LmOracle;
   private snapshots!: SnapshotManager;
 
   constructor(marketID: string, inputToken: string, event: ethereum.Event) {
@@ -100,13 +102,13 @@ export class DataManager {
     // load snapshots
     this.snapshots = new SnapshotManager(event, this.protocol, this.market);
 
-    // load oracle and update asset price
+    // load oracle and update asset price (best-effort)
     if (this.market.oracle) {
-      this.oracle = LmOracle.load(this.market.oracle!)!;
+      const oracleAddress = this.getOracleAddress();
       let assetPriceUSD =
         getAssetPriceInUSDC(
           Address.fromString(inputToken),
-          this.getOracleAddress(),
+          oracleAddress
         ) || BIGDECIMAL_ZERO;
       this.inputToken.updatePrice(assetPriceUSD);
       this.market.inputTokenPriceUSD = assetPriceUSD;
@@ -164,13 +166,37 @@ export class DataManager {
       oracle.oracleSource = source;
     }
     oracle.save();
-    this.oracle = oracle;
-
     return oracle;
   }
 
   getOracleAddress(): Address {
-    return Address.fromBytes(this.oracle.oracleAddress);
+    // 1. Try loading oracle from the Market entity
+    if (this.market.oracle) {
+      const loadedOracle = LmOracle.load(this.market.oracle!);
+      if (loadedOracle) {
+        return Address.fromBytes(loadedOracle.oracleAddress);
+      }
+      log.warning(
+        "[DataManager#getOracleAddress] LmOracle entity {} not found for market {}",
+        [this.market.oracle!, this.market.id]
+      );
+    }
+
+    // 2. Fall back to protocol-level default oracle if available
+    const constants = getNetworkSpecificConstant();
+    const defaultOracle = _DefaultOracle.load(
+      constants.protocolAddress.toHexString()
+    );
+    if (defaultOracle && defaultOracle.oracle) {
+      return Address.fromBytes(defaultOracle.oracle as Bytes);
+    }
+
+    // 3. Last resort: return ZERO_ADDRESS so price lookups safely resolve to 0
+    log.warning(
+      "[DataManager#getOracleAddress] No oracle found for market {}, returning ZERO_ADDRESS",
+      [this.market.id]
+    );
+    return Address.fromString(ZERO_ADDRESS);
   }
 
   getOrUpdateRate(

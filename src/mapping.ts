@@ -521,31 +521,38 @@ export function handleReserveDataUpdated(event: ReserveDataUpdated): void {
     trySBorrowBalance = stableDebtContract.try_totalSupply();
   }
 
-  const variableDebtContract = VariableDebtToken.bind(
-    Address.fromString(market._vToken!)
-  );
-  const tryVBorrowBalance = variableDebtContract.try_totalSupply();
+  let tryVBorrowBalance: ethereum.CallResult<BigInt> | null = null;
+  if (market._vToken) {
+    const variableDebtContract = VariableDebtToken.bind(
+      Address.fromString(market._vToken!)
+    );
+    tryVBorrowBalance = variableDebtContract.try_totalSupply();
+  }
+
   let sBorrowBalance = BIGINT_ZERO;
   let vBorrowBalance = BIGINT_ZERO;
 
   if (trySBorrowBalance != null && !trySBorrowBalance.reverted) {
     sBorrowBalance = trySBorrowBalance.value;
   }
-  if (!tryVBorrowBalance.reverted) {
+  if (tryVBorrowBalance != null && !tryVBorrowBalance.reverted) {
     vBorrowBalance = tryVBorrowBalance.value;
   }
 
-  // broken if both revert
+  // broken if both revert or both null
   if (
-    trySBorrowBalance != null &&
-    trySBorrowBalance.reverted &&
-    tryVBorrowBalance.reverted
+    (trySBorrowBalance == null || trySBorrowBalance.reverted) &&
+    (tryVBorrowBalance == null || tryVBorrowBalance.reverted)
   ) {
-    log.warning("[ReserveDataUpdated] No borrow balance found", []);
+    log.warning("[ReserveDataUpdated] No borrow balance found for market: {}", [market.id]);
     return;
   }
 
   // update total supply balance
+  if (!market.outputToken) {
+    log.warning("[ReserveDataUpdated] Market {} has no outputToken", [market.id]);
+    return;
+  }
   const ZTokenContract = ZToken.bind(Address.fromString(market.outputToken!));
   const tryTotalSupply = ZTokenContract.try_totalSupply();
   if (tryTotalSupply.reverted) {
@@ -1068,7 +1075,10 @@ export function handleLiquidationCall(event: LiquidationCall): void {
       debtTokenMarket.inputTokenPriceUSD,
       vPrincipal
     );
-    liquidatedPositions.push(vBorrowerPosition.getPositionID()!);
+    const vPositionID = vBorrowerPosition.getPositionID();
+    if (vPositionID) {
+      liquidatedPositions.push(vPositionID);
+    }
   }
 
   const sBorrowerPosition = new PositionManager(
@@ -1099,7 +1109,10 @@ export function handleLiquidationCall(event: LiquidationCall): void {
       debtTokenMarket.inputTokenPriceUSD,
       sPrincipal
     );
-    liquidatedPositions.push(sBorrowerPosition.getPositionID()!);
+    const sPositionID = sBorrowerPosition.getPositionID();
+    if (sPositionID) {
+      liquidatedPositions.push(sPositionID);
+    }
   }
 
   liquidate.positions = liquidatedPositions;
@@ -1353,9 +1366,9 @@ export function handleCollateralTransfer(event: CollateralTransfer): void {
   const tokenManager = new TokenManager(asset.toHexString(), event);
   const assetToken = tokenManager.getToken();
   let interestRateType: string | null;
-  if (assetToken._izarbanTokenType! == IzarbanTokenType.STOKEN) {
+  if (assetToken._izarbanTokenType && assetToken._izarbanTokenType == IzarbanTokenType.STOKEN) {
     interestRateType = InterestRateType.STABLE;
-  } else if (assetToken._izarbanTokenType! == IzarbanTokenType.VTOKEN) {
+  } else if (assetToken._izarbanTokenType && assetToken._izarbanTokenType == IzarbanTokenType.VTOKEN) {
     interestRateType = InterestRateType.VARIABLE;
   } else {
     interestRateType = null;
@@ -1457,16 +1470,6 @@ function updateRewards(manager: DataManager, event: ethereum.Event): void {
     tryIncentiveController.value
   );
 
-  // FIX: Handle _vToken separately. If it's null, we just skip the borrow rewards part
-  // instead of crashing the subgraph.
-  let tryBorrowRewards: ethereum.CallResult<ZarbanIncentivesController__assetsResult> | null = null;
-  
-  if (market._vToken) {
-    tryBorrowRewards = incentiveControllerContract.try_assets(
-      Address.fromString(market._vToken!)
-    );
-  }
-
   const trySupplyRewards = incentiveControllerContract.try_assets(
     Address.fromString(market.outputToken!)
   );
@@ -1530,30 +1533,34 @@ function updateRewards(manager: DataManager, event: ethereum.Event): void {
 
   // we check borrow first since it will show up first in graphql ordering
   // see explanation in docs/Mapping.md#Array Sorting When Querying
-  
-  // FIX: Check if tryBorrowRewards is not null before checking reverted
-  if (tryBorrowRewards && !tryBorrowRewards.reverted) {
-    // update borrow rewards
-    const borrowRewardsPerDay = tryBorrowRewards.value.value0.times(
-      BigInt.fromI32(SECONDS_PER_DAY)
-    );
-    const borrowRewardsPerDayUSD = borrowRewardsPerDay
-      .toBigDecimal()
-      .div(exponentToBigDecimal(rewardDecimals))
-      .times(rewardTokenPriceUSD);
 
-    const vBorrowRewardData = new RewardData(
-      vBorrowRewardToken,
-      borrowRewardsPerDay,
-      borrowRewardsPerDayUSD
+  // Handle borrow-side rewards only if a variable debt token exists
+  if (market._vToken) {
+    const tryBorrowRewards = incentiveControllerContract.try_assets(
+      Address.fromString(market._vToken!)
     );
-    const sBorrowRewardData = new RewardData(
-      sBorrowRewardToken,
-      borrowRewardsPerDay,
-      borrowRewardsPerDayUSD
-    );
-    manager.updateRewards(vBorrowRewardData);
-    manager.updateRewards(sBorrowRewardData);
+    if (!tryBorrowRewards.reverted) {
+      const borrowRewardsPerDay = tryBorrowRewards.value.value0.times(
+        BigInt.fromI32(SECONDS_PER_DAY)
+      );
+      const borrowRewardsPerDayUSD = borrowRewardsPerDay
+        .toBigDecimal()
+        .div(exponentToBigDecimal(rewardDecimals))
+        .times(rewardTokenPriceUSD);
+
+      const vBorrowRewardData = new RewardData(
+        vBorrowRewardToken,
+        borrowRewardsPerDay,
+        borrowRewardsPerDayUSD
+      );
+      const sBorrowRewardData = new RewardData(
+        sBorrowRewardToken,
+        borrowRewardsPerDay,
+        borrowRewardsPerDayUSD
+      );
+      manager.updateRewards(vBorrowRewardData);
+      manager.updateRewards(sBorrowRewardData);
+    }
   }
 
   if (!trySupplyRewards.reverted) {
@@ -1968,7 +1975,14 @@ export function handleVatFork(event: VatForkEvent): void {
   // 5th arg dart: start = 4 (signature) + 4 * 32, end = start + 32
   const dart = event.params.dart; // change to debt
 
-  const market: Market = getMarketFromIlk(ilk)!;
+  const market = getMarketFromIlk(ilk);
+  if (market == null) {
+    log.warning("[handleVatFork]Failed to get market for ilk {}/{}", [
+      ilk.toString(),
+      ilk.toHexString(),
+    ]);
+    return;
+  }
   const token = new TokenManager(market.inputToken, event);
   const collateralTransferAmount = bigIntChangeDecimals(
     dink,
@@ -2150,7 +2164,14 @@ export function handleDogBark(event: BarkEvent): void {
   const art = event.params.art;
   const due = event.params.due; //including interest, but not penalty
 
-  const market = getMarketFromIlk(ilk)!;
+  const market = getMarketFromIlk(ilk);
+  if (market == null) {
+    log.warning("[handleDogBark]Failed to get market for ilk {}/{}", [
+      ilk.toString(),
+      ilk.toHexString(),
+    ]);
+    return;
+  }
   const token = new TokenManager(market.inputToken, event);
   const tokenPrice = token.getPriceUSD();
   const collateral = bigIntChangeDecimals(lot, WAD, token.getDecimals());
@@ -2342,7 +2363,11 @@ export function handleClipTakeBid(event: TakeEvent): void {
     .toHexString()
     .concat("-")
     .concat(id.toString());
-  const clipTakeStore = _ClipTakeStore.load(storeID)!;
+  const clipTakeStore = _ClipTakeStore.load(storeID);
+  if (!clipTakeStore) {
+    log.warning("[handleClipTakeBid]clipTakeStore not found for storeID {}", [storeID]);
+    return;
+  }
   clipTakeStore.slice += INT_ONE;
   const marketID = clipTakeStore.market;
   const market = getOrCreateMarket(marketID);
@@ -2395,7 +2420,9 @@ export function handleClipTakeBid(event: TakeEvent): void {
     profitUSD
   );
 
-  liquidate.positions = clipTakeStore.positions!;
+  if (clipTakeStore.positions) {
+    liquidate.positions = clipTakeStore.positions!;
+  }
   liquidate.save();
 
   if (
@@ -2481,7 +2508,11 @@ export function handleClipYankBid(event: ClipYankEvent): void {
     .toHexString()
     .concat("-")
     .concat(id.toString());
-  const clipTakeStore = _ClipTakeStore.load(storeID)!;
+  const clipTakeStore = _ClipTakeStore.load(storeID);
+  if (!clipTakeStore) {
+    log.warning("[handleClipYankBid]clipTakeStore not found for storeID {}", [storeID]);
+    return;
+  }
 
   const clipContract = ClipContract.bind(event.address);
   const ilk = clipContract.ilk();
@@ -2493,7 +2524,14 @@ export function handleClipYankBid(event: ClipYankEvent): void {
   const liquidator = event.transaction.from.toHexString();
   // translate possible proxy/urn handler address to owner address
   liquidatee = getOwnerAddress(liquidatee);
-  const market = getMarketFromIlk(ilk)!;
+  const market = getMarketFromIlk(ilk);
+  if (market == null) {
+    log.warning("[handleClipYankBid]Failed to get market for ilk {}/{}", [
+      ilk.toString(),
+      ilk.toHexString(),
+    ]);
+    return;
+  }
   const token = new TokenManager(market.inputToken, event);
   const tokenPrice = token.getPriceUSD();
 
@@ -2521,7 +2559,9 @@ export function handleClipYankBid(event: ClipYankEvent): void {
     profitUSD
   );
 
-  liquidate.positions = clipTakeStore.positions!;
+  if (clipTakeStore.positions) {
+    liquidate.positions = clipTakeStore.positions!;
+  }
   liquidate.save();
 
   log.info(
@@ -2610,6 +2650,12 @@ export function handleSpotFileMat(event: SpotFileMatEvent): void {
     ]);
 
     const protocol = getOrCreateLendingProtocol();
+    if (!protocol._par) {
+      log.warning("[handleSpotFileMat] protocol._par is null, skipping LTV calculation", []);
+      market._mat = mat;
+      market.save();
+      return;
+    }
     const par = protocol._par!;
     market._mat = mat;
     if (mat != BIGINT_ZERO) {
@@ -2641,7 +2687,7 @@ export function handleSpotFilePar(event: SpotFileParEvent): void {
     protocol._par = par;
     protocol.save();
 
-    for (let i: i32 = 0; i <= protocol.marketIDList.length; i++) {
+    for (let i: i32 = 0; i < protocol.marketIDList.length; i++) {
       const market = getOrCreateMarket(protocol.marketIDList[i]);
       const mat = market._mat;
       if (mat != BIGINT_ZERO) {
